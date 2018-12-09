@@ -89,7 +89,6 @@ int main(int argc, const char *argv[])
     using namespace inet;
 
 	if(unix::SigAction::handleInterrupt(signalHandler) < 0){
-	//if(sigsetup() < 0){
 		std::cerr << "handleInterrupt() failed, exiting..\n";
 		exit(1);
 	}
