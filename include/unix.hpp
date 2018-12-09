@@ -127,20 +127,16 @@ namespace unix {
             return 0;
         }
 
-        // You may use these with setHandler. 
-        // Usage:
-        //    my_sigact.set_handler(SigAction::Default);
-        //    my_sigact.set_handler(SigAction::Ignore);
-        static constexpr HandlerType1 Default = SIG_DFL;
-        static constexpr HandlerType1 Ignore  = SIG_IGN;
-
         // The different handler types are mutually exclusive, but fortunately these 
         // overloaded setup funcs will handle all details for you!
         void set_handler(HandlerType1 h);
         void set_handler(HandlerType2 h);
 
-        // Removes current handler (if exists), assigns the default handler (SigAction::Default).
+        // Removes current handler (if exists), and assigns the default handler (SIG_DFL)
         void set_default_handler();
+
+        // Removes current handler (if exists), and assigns the ignore handler (SIG_IGN)
+        void set_ignore_handler();
 
         void mask_remove(Signal signum);
         void mask_add(Signal signum);
