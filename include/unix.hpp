@@ -112,8 +112,6 @@ namespace unix {
         template <typename H>
         static int handleInterrupt(H h) { 
             SigAction sa = SigAction::emptySet();
-            sa.mask_add(Signal::Interrupt);
-            sa.mask_add(Signal::User1);
             sa.set_handler(h);
 
             std::cerr << sa.to_string() << "\n";
