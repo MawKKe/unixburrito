@@ -26,8 +26,11 @@ namespace unix {
     // (Although I noticed the signal handling seems to work just fine even if you forget to set
     // SA_INFO flag...???)
     void SigAction::set_handler(HandlerType1 h){
-        _act.sa_handler = h;
+        // HURR DURR imma switch the order of assignments and wonder for SEVERAL HOURS why the
+        // fuck my signal handler is not called! HERP DERP DURR
+        // (hint: sa_sigaction and sa_handler are in an union, most likely)
         _act.sa_sigaction = nullptr;
+        _act.sa_handler = h;
         _set_siginfo(false);
     }
     void SigAction::set_handler(HandlerType2 h){
