@@ -79,6 +79,9 @@ namespace unix {
         using HandlerType2 = void (*)(int, siginfo_t *, void *);
 
     public:
+        // SIG_DFL and _IGN are platform dependent
+        static HandlerType1 Default() { return SIG_DFL; }
+        static HandlerType1 Ignore()  { return SIG_IGN; }
 
         // NOTE: Use these as your primary means of creating a SigAction object.
         // Usage:
@@ -133,10 +136,10 @@ namespace unix {
         void set_handler(HandlerType2 h);
 
         // Removes current handler (if exists), and assigns the default handler (SIG_DFL)
-        void set_default_handler();
+        void set_default_handler() { set_handler(SigAction::Default()); }
 
         // Removes current handler (if exists), and assigns the ignore handler (SIG_IGN)
-        void set_ignore_handler();
+        void set_ignore_handler() { set_handler(SigAction::Ignore()); }
 
         void mask_remove(Signal signum);
         void mask_add(Signal signum);

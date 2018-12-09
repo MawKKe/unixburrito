@@ -38,12 +38,6 @@ namespace unix {
         _act.sa_sigaction = h;
         _set_siginfo(true);
     }
-    void SigAction::set_default_handler(){
-        set_handler(SIG_DFL);
-    }
-    void SigAction::set_ignore_handler(){
-        set_handler(SIG_IGN);
-    }
 
     void SigAction::_clear() { 
         if(::sigemptyset(&_act.sa_mask) != 0){
@@ -92,10 +86,10 @@ namespace unix {
 
     std::string SigAction::_handler_name() const {
         if(!(_act.sa_flags & SA_SIGINFO)){
-           if(_act.sa_handler == SIG_DFL){
+           if(_act.sa_handler == SigAction::Default()){
                return "SigAction::Default";
            }
-           else if(_act.sa_handler == SIG_IGN){
+           else if(_act.sa_handler == SigAction::Ignore()){
                return "SigAction::Ignore";
            }
            else{
