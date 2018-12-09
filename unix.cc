@@ -112,7 +112,7 @@ namespace unix {
         std::stringstream ss;
         ss << prefix << "SigAction {\n"
            << prefix << "  handler: " << _handler_name() << "\n"
-           << prefix << "  signals: [";
+           << prefix << "  masked:  [";
         bool first = true;
         for(const auto & p : signal_map){
             if(mask_is_set(p.second)){
