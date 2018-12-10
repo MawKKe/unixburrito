@@ -1,5 +1,3 @@
-#include <addrinfo.hpp>
-
 #include <netdb.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -14,12 +12,17 @@
 #include <algorithm>
 #include <iomanip>
 
+#include <unix/inet.hpp>
+#include <unix/common.hpp>
 
 #include <cpp.hpp>
 
+namespace unix
+{
+
 namespace inet 
 {
-using namespace unix;
+
 using namespace cpp;
 
 template <typename T>
@@ -48,18 +51,11 @@ Protocol cast_or_throw(int v){
 // int_to_flags 
 int flags_to_int(const std::vector<AIFlag> & fv){
     int flags = 0;
-    for(auto & f : fv){
+    for(const auto & f : fv){
         flags |= to_underlying(f);
     }
     return flags;
 }
-
-// non-constexpr, runtime version.
-template <typename T>
-int to_int(const std::vector<T> & v){
-    return to_int(std::begin(v), std::end(v));
-}
-
 
 SockAddr::SockAddr(const struct sockaddr* sa, socklen_t len) : _len(len), _ss{} {
     memcpy(&_ss, sa, len);
@@ -148,6 +144,7 @@ AddrInfo::AddrInfo(
     reset();
     set_family(af);
     set_socktype(type);
+	set_protocol(proto);
     for(auto & f : flags){
         set_flag(f);
     }
@@ -446,11 +443,11 @@ Maybe<Socket> client_socket(
 }
 
 
-std::ostream & operator<<(std::ostream & os, const inet::AddrInfo & a){
+std::ostream & operator<<(std::ostream & os, const unix::inet::AddrInfo & a){
     os << a.to_string();
 	return os;
 }
-std::ostream & operator<<(std::ostream & os, const inet::SockAddr & a){
+std::ostream & operator<<(std::ostream & os, const unix::inet::SockAddr & a){
     os << a.to_string();
 	return os;
 }
@@ -458,3 +455,4 @@ std::ostream & operator<<(std::ostream & os, const inet::SockAddr & a){
 
 } // ns inet
 
+} // ns unix

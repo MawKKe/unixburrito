@@ -1,4 +1,4 @@
-#include <unix.hpp>
+#include <unix/signals.hpp>
 
 #include <string>
 #include <sstream>
@@ -8,6 +8,8 @@
 #include <cpp.hpp>
 
 namespace unix {
+
+	namespace signals {
 
     SigAction::SigAction() : _act{} { }
 
@@ -115,7 +117,7 @@ namespace unix {
                 if(!first) {
                     ss << ", ";
                 }
-                ss << prefix << unix::to_string(p.second);
+                ss << prefix << unix::signals::to_string(p.second);
             }
             first = false;
         }
@@ -126,7 +128,7 @@ namespace unix {
         for(const auto & p : sigaction_map){
             if(_act.sa_flags & p.first){
                 if(!first) ss << ", "; 
-                ss << unix::to_string(p.second);
+                ss << unix::signals::to_string(p.second);
                 first = false;
             }
         }
@@ -143,5 +145,7 @@ namespace unix {
     int sigaction(Signal signum, const SigAction & newact){
         return ::sigaction(cpp::to_underlying(signum), newact.action(), nullptr);
     }
+
+	} // ns signals
 
 } // ns unix

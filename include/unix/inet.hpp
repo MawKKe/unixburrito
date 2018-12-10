@@ -15,33 +15,18 @@
 #include <iostream>
 #include <algorithm>
 
-
-#include <unix.hpp>
-
 #include <cpp.hpp>
+
+#include <unix/common.hpp>
+
+namespace unix
+{
 
 namespace inet
 {
 
 using namespace cpp;
 
-
-// Reverse of flags_to_int
-template <typename T>
-constexpr int to_int(const T a, const T b){
-    int x = 0;
-    for(auto it = a; it != b; ++it){
-        x |= cpp::to_underlying(*it);
-    }
-    return x;
-}
-
-// Reverse of above
-// NOTE: this version should generate a compile-time constant, typesafely
-template <typename T>
-constexpr int to_int(const std::initializer_list<T> & l){
-    return to_int(std::begin(l), std::end(l));
-}
 
 
 // Top level enumeration classes for various network interfaces.
@@ -301,7 +286,7 @@ public:
         const std::initializer_list<RecvFlag> & f
     )
     {
-        return ::recv(_sock, reinterpret_cast<unsigned char*>(buf), buflen, to_int(f));
+        return ::recv(_sock, reinterpret_cast<unsigned char*>(buf), buflen, cpp::to_int(f));
     }
 
     std::pair<ssize_t, Maybe<SockAddr>> 
@@ -311,7 +296,7 @@ public:
         struct sockaddr_storage ss = {};
         socklen_t len = sizeof(ss);
 
-        auto ret = ::recvfrom(_sock, (unsigned char*)buf, buflen, to_int(f),
+        auto ret = ::recvfrom(_sock, (unsigned char*)buf, buflen, cpp::to_int(f),
                reinterpret_cast<struct sockaddr*>(&ss), &len
         );
 
@@ -371,3 +356,4 @@ std::ostream & operator<<(std::ostream &, const inet::SockAddr &);
 
 } // end of ns inet
 
+} // unix

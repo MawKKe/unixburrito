@@ -1,4 +1,3 @@
-#include <addrinfo.hpp>
 
 #include <iostream>
 #include <string>
@@ -6,7 +5,8 @@
 
 #include <csignal>
 
-#include <unix.hpp>
+#include <unix/inet.hpp>
+#include <unix/signals.hpp>
 
 volatile std::sig_atomic_t run = true;
 
@@ -32,7 +32,6 @@ int sigsetup(){
 */
 
 int server(int argc, const char* argv[]){
-    using namespace inet;
 
     if(argc < 3){
         std::cerr << "usage: <address or name> <port>\n";
@@ -43,7 +42,7 @@ int server(int argc, const char* argv[]){
     auto srv = std::string(argv[2]);
 
 
-    auto _s = inet::server_socket_udp(h, srv);
+    auto _s = unix::inet::server_socket_udp(h, srv);
 
     if(!_s){
         std::cout << "Error opening socket..." << std::endl;
@@ -52,7 +51,7 @@ int server(int argc, const char* argv[]){
 
     std::cout << "----------------------------------------\n";
 
-    Socket & s = *_s;
+    unix::inet::Socket & s = *_s;
 
     std::cout << "server bound to: \n" << s.getsockname() << std::endl;
 
@@ -86,9 +85,7 @@ int client(int argc, const char* argv[]){
 
 int main(int argc, const char *argv[])
 {
-    using namespace inet;
-
-	if(unix::SigAction::handleInterrupt(signalHandler) < 0){
+	if(unix::signals::handleInterrupt(signalHandler) < 0){
 		std::cerr << "handleInterrupt() failed, exiting..\n";
 		exit(1);
 	}

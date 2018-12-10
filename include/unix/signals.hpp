@@ -6,14 +6,11 @@
 #include <csignal>
 #include <cstring>
 
+#include <unix/common.hpp>
+
 namespace unix {
-    // basically wrapper around strerror_r
-    inline std::string errno_str(int e){
-        char buf[256];
-		// This is how big boys get around stupid compliance issues (XSI vs GNU) :D
-        auto ret = ::strerror_r(e, buf, sizeof(buf));
-        return (!ret) ? ("Unknown error code: " + std::to_string(e)) : std::string(buf);
-    }
+
+	namespace signals {
 
     // TODO add more signals....
     enum class Signal : uint32_t {
@@ -95,42 +92,6 @@ namespace unix {
         static SigAction emptySet() { SigAction sa; sa._clear(); return sa; }
         static SigAction fullSet()  { SigAction sa; sa._fill();  return sa; }
 
-        // You may also utilize this one-shot interrupt handling setup. Useful if you wish
-        // to just get proper shutdown handling done. Add your handler function and "run"-variable,
-        // like this:
-        /*
-            volatile std::sig_atomic_t run = true;
-
-            static void myHandler(int sig __attribute__ ((unused)))
-            {
-                run = false;
-            }
-
-        */
-        // Then in you main():
-        //
-        //  if(unix::SigAction::handleInterrupt(myHandler) < 0){
-        //      ...
-        //  }
-        //
-        template <typename H>
-        static int handleInterrupt(H h) { 
-            SigAction sa = SigAction::emptySet();
-            sa.set_handler(h);
-
-            std::cerr << sa.to_string() << "\n";
-
-            auto sig = Signal::Interrupt;
-
-            // Set a signal handler to catch SIGINT to allow for graceful termination.
-            if((unix::sigaction(sig, sa) != 0))
-            {
-                std::cerr << "ERROR sigaction(): " << unix::errno_str(errno) << "\n";
-                return -1;
-            }
-            std::cerr << "INFO: signal handler set up for: " << unix::to_string(sig) << "\n";
-            return 0;
-        }
 
         // The different handler types are mutually exclusive, but fortunately these 
         // overloaded setup funcs will handle all details for you!
@@ -174,10 +135,48 @@ namespace unix {
     // call sigaction, store old action to 'oldact'
     inline int sigaction(int signum, const SigAction & newact, SigAction & oldact);
 
+	// You may also utilize this one-shot interrupt handling setup. Useful if you wish
+	// to just get proper shutdown handling done. Add your handler function and "run"-variable,
+	// like this:
+	/*
+		volatile std::sig_atomic_t run = true;
+
+		static void myHandler(int sig __attribute__ ((unused)))
+		{
+			run = false;
+		}
+
+	*/
+	// Then in you main():
+	//
+	//  if(unix::signals::handleInterrupt(myHandler) < 0){
+	//      ...
+	//  }
+	//
+	template <typename H>
+	int handleInterrupt(H h) { 
+		SigAction sa = SigAction::emptySet();
+		sa.set_handler(h);
+
+		std::cerr << sa.to_string() << "\n";
+
+		auto sig = Signal::Interrupt;
+
+		// Set a signal handler to catch SIGINT to allow for graceful termination.
+		if((unix::signals::sigaction(sig, sa) != 0))
+		{
+			std::cerr << "ERROR sigaction(): " << unix::errno_str(errno) << "\n";
+			return -1;
+		}
+		std::cerr << "INFO: signal handler set up for: " << unix::signals::to_string(sig) << "\n";
+		return 0;
+	}
+
+	} // ns signals
 
 } // ns unix
 
-inline std::ostream & operator<<(std::ostream & os, const unix::SigAction & sa){
+inline std::ostream & operator<<(std::ostream & os, const unix::signals::SigAction & sa){
     os << sa.to_string();
     return os;
 }
