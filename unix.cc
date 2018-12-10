@@ -5,13 +5,9 @@
 #include <iostream>
 #include <cstring>
 
-namespace unix {
+#include <cpp.hpp>
 
-    std::string errno_str(int e){
-        char buf[256];
-        const char * msg = ::strerror_r(e, buf, sizeof(buf));
-        return (msg == nullptr) ? ("Unknown error " + std::to_string(e)) : std::string(msg);
-    }
+namespace unix {
 
     SigAction::SigAction() : _act{} { }
 
@@ -142,4 +138,10 @@ namespace unix {
 
     std::string to_string(Signal s) { return signal_names.find(s)->second; }
     std::string to_string(SigActionFlag f) { return sigaction_names.find(f)->second; }
+
+    // call sigaction, ignore old action
+    int sigaction(Signal signum, const SigAction & newact){
+        return ::sigaction(cpp::to_underlying(signum), newact.action(), nullptr);
+    }
+
 } // ns unix

@@ -15,6 +15,8 @@
 #include <iomanip>
 
 
+#include <cpp.hpp>
+
 namespace inet 
 {
 using namespace unix;
@@ -442,6 +444,17 @@ Maybe<Socket> client_socket(
 {
     return Nothing();
 }
+
+
+std::ostream & operator<<(std::ostream & os, const inet::AddrInfo & a){
+    os << a.to_string();
+	return os;
+}
+std::ostream & operator<<(std::ostream & os, const inet::SockAddr & a){
+    os << a.to_string();
+	return os;
+}
+
 
 } // ns inet
 

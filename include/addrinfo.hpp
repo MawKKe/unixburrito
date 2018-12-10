@@ -10,18 +10,21 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
 
 #include <iostream>
 #include <algorithm>
 
+
 #include <unix.hpp>
+
 #include <cpp.hpp>
-
-
-using namespace cpp;
 
 namespace inet
 {
+
+using namespace cpp;
+
 
 // Reverse of flags_to_int
 template <typename T>
@@ -360,20 +363,11 @@ Maybe<Socket> client_socket(
 );
 
 
+std::ostream & operator<<(std::ostream &, const inet::AddrInfo &);
+std::ostream & operator<<(std::ostream &, const inet::SockAddr &);
+
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 } // end of ns inet
-
-inline std::ostream & operator<<(std::ostream & os, const inet::AddrInfo & a){
-    os << a.to_string();
-	return os;
-}
-inline std::ostream & operator<<(std::ostream & os, const inet::SockAddr & a){
-    os << a.to_string();
-	return os;
-}
-
-
-
 

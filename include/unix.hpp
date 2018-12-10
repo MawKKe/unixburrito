@@ -4,12 +4,16 @@
 #include <map>
 #include <string>
 #include <csignal>
-
-#include <cpp.hpp>
+#include <cstring>
 
 namespace unix {
     // basically wrapper around strerror_r
-    std::string errno_str(int e);
+    inline std::string errno_str(int e){
+        char buf[256];
+		// This is how big boys get around stupid compliance issues (XSI vs GNU) :D
+        auto ret = ::strerror_r(e, buf, sizeof(buf));
+        return (!ret) ? ("Unknown error code: " + std::to_string(e)) : std::string(buf);
+    }
 
     // TODO add more signals....
     enum class Signal : uint32_t {
@@ -165,9 +169,7 @@ namespace unix {
     };
 
     // call sigaction, ignore old action
-    inline int sigaction(Signal signum, const SigAction & newact){
-        return ::sigaction(cpp::to_underlying(signum), newact.action(), nullptr);
-    }
+    int sigaction(Signal signum, const SigAction & newact);
 
     // call sigaction, store old action to 'oldact'
     inline int sigaction(int signum, const SigAction & newact, SigAction & oldact);
