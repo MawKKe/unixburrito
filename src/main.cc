@@ -15,22 +15,6 @@ void signalHandler(int w_sig __attribute__ ((unused)))
     run = false;
 }
 
-/*
-int sigsetup(){
-    using namespace unix;
-    SigAction sa = SigAction::emptySet();
-    sa.set_handler(signalHandler);
-    sa.mask_add(Signal::User1);
-    auto sig = Signal::Interrupt;
-    if(unix::sigaction(sig, sa) < 0){
-        std::cerr << "sigaction(): " << unix::errno_str(errno) << "\n";
-        return -1;
-    }
-    std::cerr << "INFO: signal handler set up for " << unix::to_string(sig) << "\n";
-    return 0;
-}
-*/
-
 int server(int argc, const char* argv[]){
 
     if(argc < 3){
