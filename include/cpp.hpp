@@ -28,6 +28,24 @@ namespace cpp {
     bool element_in(const T & e, const std::vector<T> & v){
         return std::find(v.begin(), v.end(), e) != v.end();
     }
+
+	// Reverse of flags_to_int
+	template <typename T>
+	constexpr auto to_int(const T a, const T b){
+		auto x = 0;
+		for(auto it = a; it != b; ++it){
+			x |= cpp::to_underlying(*it);
+		}
+		return x;
+	}
+
+	// Reverse of above
+	// NOTE: this version should generate a compile-time constant, typesafely
+	// FIXME: for some reason assigning the return value does not give warning about narrowing conversion
+	template <typename T>
+	constexpr int to_int(const std::initializer_list<T> & l){
+		return to_int(std::begin(l), std::end(l));
+	}
 }
 
 template <typename T>
