@@ -304,16 +304,9 @@ public:
         return std::make_pair(ret, SockAddr(ss, len));
     }
 
-    Maybe<SockAddr> getsockname() const {
-        struct sockaddr_storage ss;
-        socklen_t len = sizeof(ss);
-        auto ret = ::getsockname(_sock, reinterpret_cast<struct sockaddr*>(&ss), &len);
-        if(ret < 0){
-            std::cerr << "ERROR getsockname(): " << _unix::errno_str(errno) << std::endl;
-            return Nothing();
-        }
-        return SockAddr(ss, len);
-    }
+    Maybe<SockAddr> getsockname() const;
+    Maybe<SockAddr> getpeername() const;
+
 
     int setsockopt(int level, int optname, const void* optval, socklen_t optlen) {
         // hmmm

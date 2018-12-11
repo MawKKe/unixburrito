@@ -438,6 +438,27 @@ int Socket::listen(int backlog){
     return ::listen(_sock, backlog);
 }
 
+Maybe<SockAddr> Socket::getsockname() const {
+	struct sockaddr_storage ss;
+	socklen_t len = sizeof(ss);
+	auto ret = ::getsockname(_sock, reinterpret_cast<struct sockaddr*>(&ss), &len);
+	if(ret < 0){
+		std::cerr << "ERROR getsockname(): " << _unix::errno_str(errno) << std::endl;
+		return Nothing();
+	}
+	return SockAddr(ss, len);
+}
+Maybe<SockAddr> Socket::getpeername() const {
+	struct sockaddr_storage ss;
+	socklen_t len = sizeof(ss);
+	int ret = ::getpeername(_sock, reinterpret_cast<struct sockaddr*>(&ss), &len);
+	if(ret < 0){
+		std::cerr << "ERROR getpeername(): " << _unix::errno_str(errno) << std::endl;
+		return Nothing();
+	}
+	return SockAddr(ss, len);
+}
+
 Maybe<Socket> client_socket(
     const std::string & raddr,
     const std::string & service
