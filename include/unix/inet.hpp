@@ -307,6 +307,15 @@ public:
     Maybe<SockAddr> getsockname() const;
     Maybe<SockAddr> getpeername() const;
 
+    // needs to be connect()'ed first
+    ssize_t send(const std::string & s, int flags = 0){
+        return ::send(_sock, reinterpret_cast<const void*>(s.data()), s.size(), flags);
+    }
+
+    // needs to be connect()'ed first
+    ssize_t send(const uint8_t *buf, size_t buflen, int flags = 0){
+        return ::send(_sock, reinterpret_cast<const void*>(buf), buflen, flags);
+    }
 
     int setsockopt(int level, int optname, const void* optval, socklen_t optlen) {
         // hmmm
