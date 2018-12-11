@@ -370,27 +370,31 @@ Socket::~Socket() {
     _sock = -1;
 }
 
-int Socket::bind(const AddrInfo & ai){
-    if(!ai.sockaddr()){
-        throw std::runtime_error("Trying to bind without a sockaddr");
-    }
-    const SockAddr & sa = *ai.sockaddr();
-
+int Socket::bind(const SockAddr & sa){
     return ::bind(_sock, sa.addr(), sa.addrlen());
 }
 
-Maybe<int> Socket::connect(const SockAddr & sa){
-    return ::connect(_sock, sa.addr(), sa.addrlen());
+int Socket::bind(const AddrInfo & ai){
+    if(!ai.sockaddr()){
+        throw std::runtime_error("Trying to bind() without a sockaddr!");
+    }
+	return bind(*ai.sockaddr());
 }
 
-Maybe<int> Socket::connect(const Maybe<SockAddr> & sa){
-    if(!sa){ return Nothing(); }
-    return ::connect(_sock, (*sa).addr(), (*sa).addrlen());
+int Socket::connect(const SockAddr & sa){
+	int ret = ::connect(_sock, sa.addr(), sa.addrlen());
+	if(ret < 0){
+		perror("connect()");
+		//std::cerr << "ERRROR: connect(): " << _unix::errno_str(errno) << std::endl;
+	}
+	return ret;
 }
 
-Maybe<int> Socket::connect(const Maybe<AddrInfo> & ai){
-    if(!ai){ return Nothing(); }
-    return connect((*ai).sockaddr());
+int Socket::connect(const AddrInfo & ai){
+	if(!ai.sockaddr()){
+        throw std::runtime_error("Trying to connect() without a sockaddr!");
+	}
+	return connect(*ai.sockaddr());
 }
 
 

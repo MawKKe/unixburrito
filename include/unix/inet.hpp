@@ -272,11 +272,12 @@ public:
     ~Socket();
 
     int bind(const AddrInfo & ai);
+    int bind(const SockAddr & ai);
+
     int listen(int backlog);
 
-    Maybe<int> connect(const Maybe<AddrInfo> & ai);
-    Maybe<int> connect(const Maybe<SockAddr> & sa);
-    Maybe<int> connect(const SockAddr & sa);
+    int connect(const AddrInfo &);
+    int connect(const SockAddr &);
 
     // Type safe version of the ordinary recv and recvfrom
     // Declared in header so the flag-folding can be optimized out at compile time
