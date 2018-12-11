@@ -399,7 +399,7 @@ int Socket::connect(const AddrInfo & ai){
 
 
 
-
+// a.k.a "passive" socket
 Maybe<Socket> server_socket_udp(
     const std::string & laddr,
     const std::string & service
@@ -409,10 +409,10 @@ Maybe<Socket> server_socket_udp(
 
     hints.set_flag(AIFlag::Passive);
 
-    auto aiv = getAddrInfo(laddr, hints, service);
+    const auto aiv = getAddrInfo(laddr, hints, service);
 
     for(const auto & ai : aiv){
-        std::cerr << "DEBUG: got ai:\n";
+        std::cerr << "DEBUG: server_socket got ai:\n";
         std::cout << ai << std::endl;
         try {
             Socket s(ai);
@@ -424,7 +424,7 @@ Maybe<Socket> server_socket_udp(
             return std::move(s);
         }
         catch (std::runtime_error & e){
-            std::cerr << "server_socket_tcp creation failed: " <<  e.what() << std::endl;
+            std::cerr << "server_socket_udp creation failed: " <<  e.what() << std::endl;
             continue;
         }
     }

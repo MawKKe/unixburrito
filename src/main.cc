@@ -44,6 +44,9 @@ int server(int argc, const char* argv[]){
 
     std::cout << "----------------------------------------\n";
 
+
+	s.listen(100);
+
     uint8_t buf[9000];
 
     while(run){
@@ -57,8 +60,9 @@ int server(int argc, const char* argv[]){
         }
 
         else{
-            std::cerr << "from: " << p.second << std::endl;
+            std::cerr << "from:  " << p.second << std::endl;
             std::cerr << "bytes: " << n << std::endl;
+			std::cerr << "data:  " << std::string((const char*)buf, n) << "\n";
         }
     }
 	std::cerr << "Exiting...";
@@ -66,7 +70,46 @@ int server(int argc, const char* argv[]){
 }
 
 int client(int argc, const char* argv[]){
-    return -1;
+	if(argc < 3){
+		std::cerr << "usage: <address or name> <port>\n";
+		return -1;
+	}
+
+	auto h   = std::string(argv[1]);
+	auto srv = std::string(argv[2]);
+
+	auto _s = unix::inet::client_socket_any(h, srv);
+
+	if(!_s){
+		std::cout << "Error opening socket..." << std::endl;
+		return -1;
+	}
+
+	unix::inet::Socket & s = *_s;
+
+	std::cout << "----------------------------------------\n";
+	std::cout << "client connected to: \n" << s.getpeername() << std::endl;
+	std::cout << "----------------------------------------\n";
+
+	std::string input;
+
+	while(run){
+		std::getline(std::cin, input);
+
+		auto p = s.send(input);
+
+		if(p < 0){
+			std::cerr << "ERROR send(): " << unix::errno_str(errno) << std::endl;
+			continue;
+		}
+		if(p != (ssize_t)input.size()){
+			std::cerr << "WARNING: send() returned " << p << ", requested: " << input.size() << std::endl;
+			continue;
+		}
+
+	}
+	std::cerr << "Exiting...";
+	return 0;
 }
 
 
