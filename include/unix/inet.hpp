@@ -345,7 +345,7 @@ Maybe<Socket> server_socket_udp(
     const std::string & service = ""
 );
 
-Maybe<Socket> client_socket(
+Maybe<Socket> client_socket_any(
     const std::string & raddr,
     const std::string & service = ""
 );

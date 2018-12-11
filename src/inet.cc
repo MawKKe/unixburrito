@@ -459,11 +459,39 @@ Maybe<SockAddr> Socket::getpeername() const {
 	return SockAddr(ss, len);
 }
 
-Maybe<Socket> client_socket(
+// a.k.a "active" socket
+Maybe<Socket> client_socket_any(
     const std::string & raddr,
     const std::string & service
 )
 {
+    // Defaults, "Any" in all fields. The details will be filled depending on the other side
+    AddrInfo hints;
+
+    const auto aiv = getAddrInfo(raddr, hints, service);
+
+    for(const auto & ai : aiv){
+        std::cerr << "----\n";
+        std::cerr << "DEBUG: client_socket got ai:\n";
+        std::cout << ai << std::endl;
+        try {
+            Socket s(ai);
+            int ret = s.connect(ai);
+            if(ret != 0){
+                std::cerr << "ERROR connect(): " << _unix::errno_str(errno) << std::endl;
+                continue;
+            }
+            return std::move(s);
+        }
+        catch (std::runtime_error & e){
+            std::cerr << "client_socket_any creation failed: " <<  e.what() << std::endl;
+            continue;
+        }
+    }
+    std::cerr
+        << "ERROR: could not create socket for '"
+        << raddr << ":" << service << "'" << std::endl;
+
     return Nothing();
 }
 
