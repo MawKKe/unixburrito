@@ -14,7 +14,7 @@ static inline std::string __strerror_r(int ret, const char * buf, int e){
 	return (ret == 0) ? std::string((const char*)buf) : ("Unknown error code: " + std::to_string(e));
 }
 
-namespace unix {
+namespace _unix {
 
 	// Actual interface
     inline std::string errno_str(int e){

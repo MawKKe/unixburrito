@@ -8,6 +8,9 @@
 #include <unix/inet.hpp>
 #include <unix/signals.hpp>
 
+// Kinda like in python you say "import Foo as bar'
+namespace unix = _unix;
+
 volatile std::sig_atomic_t run = true;
 
 void signalHandler(int w_sig __attribute__ ((unused)))

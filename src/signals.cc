@@ -7,7 +7,7 @@
 
 #include <cpp.hpp>
 
-namespace unix {
+namespace _unix {
 
 	namespace signals {
 
@@ -39,28 +39,28 @@ namespace unix {
 
     void SigAction::_clear() { 
         if(::sigemptyset(&_act.sa_mask) != 0){
-            throw std::runtime_error("sigemptyset() failed: " + unix::errno_str(errno));
+            throw std::runtime_error("sigemptyset() failed: " + _unix::errno_str(errno));
         }
     }
     void SigAction::_fill() {
         if(::sigfillset(&_act.sa_mask) != 0){
-            throw std::runtime_error("sigfillset() failed: " + unix::errno_str(errno));
+            throw std::runtime_error("sigfillset() failed: " + _unix::errno_str(errno));
         }
     }
     void SigAction::mask_remove(Signal signum) {
         if(::sigdelset(&_act.sa_mask, cpp::to_underlying(signum)) != 0){
-            throw std::runtime_error("sigaddset() failed: " + unix::errno_str(errno));
+            throw std::runtime_error("sigaddset() failed: " + _unix::errno_str(errno));
         }
     }
     void SigAction::mask_add(Signal signum) {
         if(::sigaddset(&_act.sa_mask, cpp::to_underlying(signum)) != 0){
-            throw std::runtime_error("sigaddset() failed: " + unix::errno_str(errno));
+            throw std::runtime_error("sigaddset() failed: " + _unix::errno_str(errno));
         }
     }
     bool SigAction::mask_is_set(Signal signum) const {
         auto ret = ::sigismember(&_act.sa_mask, cpp::to_underlying(signum));
         if(ret < 0){
-            throw std::runtime_error("sigaddset() failed: " + unix::errno_str(errno));
+            throw std::runtime_error("sigaddset() failed: " + _unix::errno_str(errno));
         }
         // manuals say that "true" == 1, "false == 0", but what if the value is
         // something else?
@@ -117,7 +117,7 @@ namespace unix {
                 if(!first) {
                     ss << ", ";
                 }
-                ss << prefix << unix::signals::to_string(p.second);
+                ss << prefix << _unix::signals::to_string(p.second);
             }
             first = false;
         }
@@ -128,7 +128,7 @@ namespace unix {
         for(const auto & p : sigaction_map){
             if(_act.sa_flags & p.first){
                 if(!first) ss << ", "; 
-                ss << unix::signals::to_string(p.second);
+                ss << _unix::signals::to_string(p.second);
                 first = false;
             }
         }

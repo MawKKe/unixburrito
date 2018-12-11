@@ -17,7 +17,7 @@
 
 #include <cpp.hpp>
 
-namespace unix
+namespace _unix
 {
 
 namespace inet 
@@ -414,7 +414,7 @@ Maybe<Socket> server_socket_udp(
             Socket s(ai);
             int ret = s.bind(ai);
             if(ret != 0){
-                std::cerr << "ERROR bind(): " << unix::errno_str(errno) << std::endl;
+                std::cerr << "ERROR bind(): " << _unix::errno_str(errno) << std::endl;
                 continue;
             }
             return std::move(s);
@@ -443,11 +443,11 @@ Maybe<Socket> client_socket(
 }
 
 
-std::ostream & operator<<(std::ostream & os, const unix::inet::AddrInfo & a){
+std::ostream & operator<<(std::ostream & os, const _unix::inet::AddrInfo & a){
     os << a.to_string();
 	return os;
 }
-std::ostream & operator<<(std::ostream & os, const unix::inet::SockAddr & a){
+std::ostream & operator<<(std::ostream & os, const _unix::inet::SockAddr & a){
     os << a.to_string();
 	return os;
 }

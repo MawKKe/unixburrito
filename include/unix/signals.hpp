@@ -8,7 +8,7 @@
 
 #include <unix/common.hpp>
 
-namespace unix {
+namespace _unix {
 
 	namespace signals {
 
@@ -163,12 +163,12 @@ namespace unix {
 		auto sig = Signal::Interrupt;
 
 		// Set a signal handler to catch SIGINT to allow for graceful termination.
-		if((unix::signals::sigaction(sig, sa) != 0))
+		if((_unix::signals::sigaction(sig, sa) != 0))
 		{
-			std::cerr << "ERROR sigaction(): " << unix::errno_str(errno) << "\n";
+			std::cerr << "ERROR sigaction(): " << _unix::errno_str(errno) << "\n";
 			return -1;
 		}
-		std::cerr << "INFO: signal handler set up for: " << unix::signals::to_string(sig) << "\n";
+		std::cerr << "INFO: signal handler set up for: " << _unix::signals::to_string(sig) << "\n";
 		return 0;
 	}
 
@@ -176,7 +176,7 @@ namespace unix {
 
 } // ns unix
 
-inline std::ostream & operator<<(std::ostream & os, const unix::signals::SigAction & sa){
+inline std::ostream & operator<<(std::ostream & os, const _unix::signals::SigAction & sa){
     os << sa.to_string();
     return os;
 }

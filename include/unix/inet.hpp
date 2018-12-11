@@ -19,7 +19,7 @@
 
 #include <unix/common.hpp>
 
-namespace unix
+namespace _unix
 {
 
 namespace inet
@@ -308,7 +308,7 @@ public:
         socklen_t len = sizeof(ss);
         auto ret = ::getsockname(_sock, reinterpret_cast<struct sockaddr*>(&ss), &len);
         if(ret < 0){
-            std::cerr << "ERROR getsockname(): " << unix::errno_str(errno) << std::endl;
+            std::cerr << "ERROR getsockname(): " << _unix::errno_str(errno) << std::endl;
             return Nothing();
         }
         return SockAddr(ss, len);
