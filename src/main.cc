@@ -8,6 +8,8 @@
 #include <unix/inet.hpp>
 #include <unix/signals.hpp>
 
+#include <unix/epoll.hpp>
+
 // Kinda like in python you say "import Foo as bar'
 namespace unix = _unix;
 
@@ -16,6 +18,36 @@ volatile std::sig_atomic_t run = true;
 void signalHandler(int w_sig __attribute__ ((unused)))
 {
     run = false;
+}
+
+void handle_in(unix::inet::Socket & s){
+    uint8_t buf[9000];
+
+    auto p = s.recvfrom(buf, sizeof(buf), {});
+
+    ssize_t n = p.first;
+    std::cout << "Receive return: " << n << std::endl;
+
+    if(n < 0){
+        std::cerr << "recv(): " << unix::errno_str(errno) << std::endl;
+    }
+
+    else{
+        std::cerr << "from:  " << *p.second << std::endl;
+        std::cerr << "bytes: " << n << std::endl;
+        std::cerr << "data:  " << std::string((const char*)buf, n) << "\n";
+        std::reverse(std::begin(buf), std::begin(buf)+n-1);
+
+        ssize_t n2 = s.sendto(buf, n, *p.second, {unix::inet::SendFlag::DontWait});
+
+        if(n2 < 0){
+            std::cerr << "sendto(): " << unix::errno_str(errno) << std::endl;
+        }
+        if(n2 != n){
+            std::cerr << "omg sendto has problems, gosh: " << std::to_string(n2) << "\n";
+        }
+    }
+
 }
 
 int server(int argc, const char* argv[]){
@@ -44,26 +76,35 @@ int server(int argc, const char* argv[]){
 
     std::cout << "----------------------------------------\n";
 
-
 	s.listen(100);
 
-    uint8_t buf[9000];
+    using namespace _unix::epoll;
+
+    auto epoll = Epoll();
+
+    epoll.add(s, {EpollEventType::Input, EpollEventType::EdgeTrigger});
+
+    using namespace std::chrono_literals;
 
     while(run){
-        auto p = s.recvfrom(buf, sizeof(buf), {});
-
-        ssize_t n = p.first;
-        std::cout << "Receive return: " << n << std::endl;
-
-        if(n < 0){
-            std::cerr << "recv(): " << unix::errno_str(errno) << std::endl;
+        std::cerr << "DEBUG: waiting..\n";
+        EventList<10> evts;
+        auto n_ev = epoll.wait(evts, 500ms);
+        if(n_ev < 0){
+            // TODO: could be a non-error value, such as timeout expiration
+            std::cerr << "ERROR - Epoll::wait(): " << unix::errno_str(errno) << std::endl;;
+            break;
+        }
+        std::cerr << "epoll_wait returned: " << n_ev << std::endl;
+        for(int i = 0; i < n_ev; ++i){
+            if(evts[i].matches(s) && (evts[i] & EpollEventType::Input)){
+                handle_in(s);
+            }
+            else{
+                std::cerr << "Unknown socket or event type" << std::endl;
+            }
         }
 
-        else{
-            std::cerr << "from:  " << p.second << std::endl;
-            std::cerr << "bytes: " << n << std::endl;
-			std::cerr << "data:  " << std::string((const char*)buf, n) << "\n";
-        }
     }
 	std::cerr << "Exiting...";
     return 0;
