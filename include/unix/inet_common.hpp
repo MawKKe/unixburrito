@@ -2,6 +2,9 @@
 
 #include <cpp.hpp>
 
+#include <string>
+#include <sstream>
+
 using namespace cpp;
 
 namespace _unix {

@@ -23,40 +23,6 @@ namespace _unix
 namespace inet 
 {
 
-/*
-static const std::map<AddressFamily, const char*> address_family_names = {
-    {
-        {AddressFamily::Any,  "AddressFamily::Any"},
-        {AddressFamily::IPv4, "AddressFamily::IPv4"},
-        {AddressFamily::IPv6, "AddressFamily::IPv6"},
-        //{AddressFamily::Unix, "AddressFamily::Unix"},
-    }
-};
-static const std::map<Protocol, const char*> protocol_names = {
-    {
-        {Protocol::Any,  "Protocol::Any"},
-        {Protocol::UDP,  "Protocol::UDP"},
-        {Protocol::TCP,  "Protocol::TCP"},
-    }
-};
-static const std::map<AIFlag, const char*> ai_flag_names = {
-    {
-        {AIFlag::Passive,     "AIFlag::Passive"     },
-        {AIFlag::CanonName,   "AIFlag::CanonName"   },
-        {AIFlag::NumericHost, "AIFlag::NumericHost" },
-        {AIFlag::NumericServ, "AIFlag::Numericserv" },
-        {AIFlag::V4Mapped,    "AIFlag::V4Mapped"    },
-        {AIFlag::AddrConfig,  "AIFlag::AddrConfig"  },
-    }
-};
-
-static const std::map<RecvFlag, const char*> recv_flag_names = {
-    {
-        {RecvFlag::DontWait, "RecvFlag::DontWait"},
-    }
-};
-*/
-
 using namespace cpp;
 
 // int_to_flags 

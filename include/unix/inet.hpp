@@ -14,7 +14,6 @@
 
 #include <iostream>
 #include <algorithm>
-#include <sstream>
 
 #include <cpp.hpp>
 #include <unix/common.hpp>
