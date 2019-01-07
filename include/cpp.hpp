@@ -83,11 +83,11 @@ namespace cpp {
 
 template <typename T>
 std::ostream & operator<<(std::ostream & os, const cpp::Maybe<T> & m){
-    if(!m){ 
+    if(!m){
         os << "Nothing" ;
     }
-    else{ 
-        os << *m;
+    else{
+        os << "Just " << *m;
     }
     return os;
 }
