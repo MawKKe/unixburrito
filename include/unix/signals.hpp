@@ -89,6 +89,7 @@ namespace _unix {
         //     SigAction sa = SigAction::emptySet();
         //   or
         //     SigAction sa = SigAction::fullSet();
+        // TODO: These are not actually a feature of SigAction, but sigset_t. Create new class
         static SigAction emptySet() { SigAction sa; sa._clear(); return sa; }
         static SigAction fullSet()  { SigAction sa; sa._fill();  return sa; }
 
