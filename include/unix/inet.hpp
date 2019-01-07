@@ -14,10 +14,11 @@
 
 #include <iostream>
 #include <algorithm>
+#include <sstream>
 
 #include <cpp.hpp>
-
 #include <unix/common.hpp>
+#include <unix/inet_common.hpp>
 
 namespace _unix
 {
@@ -27,141 +28,20 @@ namespace inet
 
 using namespace cpp;
 
-
-
-// Top level enumeration classes for various network interfaces.
-// The C-apis use enumerated variables, but their types are just defined int's, which
-// are not type safe in any way. These enum *classes* will perhaps prevent stupid accidential
-// mistakes from creeping into the code.
-
-// There are a LOT of address families, but here are the most common
-enum class AddressFamily : uint32_t { 
-    Any     = AF_UNSPEC, 
-    IPv4    = AF_INET, 
-    IPv6    = AF_INET6, 
-    /* Unix = AF_UNIX */ 
-};
-
-enum class SocketType : uint32_t {
-    Any         = 0, 
-    Datagram    = SOCK_DGRAM,
-    Stream      = SOCK_STREAM,
-    Raw         = SOCK_RAW,
-};
-
-enum class Protocol : uint32_t {
-    Any = 0,
-    UDP = IPPROTO_UDP,
-    TCP = IPPROTO_TCP
-};
-
-enum class AIFlag : uint32_t {
-    // Even though these are enumerated, they are not mutually exclusive (like the 
-    // other enums are)
-    // TODO: probably non-exhaustive list. Check you OS's include files for more flags...
-    Passive     = AI_PASSIVE,
-    CanonName   = AI_CANONNAME,
-    NumericHost = AI_NUMERICHOST,
-    NumericServ = AI_NUMERICSERV,
-    V4Mapped    = AI_V4MAPPED,
-    All         = AI_ALL,
-    AddrConfig  = AI_ADDRCONFIG,
-};
-
-
-// TODO: augment me plz
-enum class RecvFlag : uint32_t {
-    DontWait = MSG_DONTWAIT,
-};
-const std::map<int, RecvFlag> recv_flag_map = {
-    {MSG_DONTWAIT, RecvFlag::DontWait},
-};
-const std::map<RecvFlag, std::string> recv_flag_names = {
-    {RecvFlag::DontWait, "RecvFlag::DontWait"},
-};
-
-// How to augment:
-//  1) add the label into the enum classes, use the proper 'int' value
-//  2) add mapping from integer value to enum (***Map variables, below)
-//  3) add mapping from
-
-// These exist mainly because the C++ enum classes do not allow checking for existence
-// (like "if (IPv4 in AddressFamily::values) "). Some solutions for existence checking
-// can be developed by treating (casting) the enum values as int, and then checking wether
-// the value is between lower and upper bounds. This, however, does not work when the enum values
-// are non-contiguous.
-const std::map<int, AddressFamily> address_family_map = {
-    {AF_UNSPEC, AddressFamily::Any  },
-    {AF_INET,   AddressFamily::IPv4 },
-    {AF_INET6,  AddressFamily::IPv6 },
-    //{AF_UNIX,   AddressFamily::Unix },
-    // TODO: are these all possible?
-};
-const std::map<int, SocketType> socket_type_map = {
-    {0,            SocketType::Any      },
-    {SOCK_DGRAM,   SocketType::Datagram },
-    {SOCK_STREAM,  SocketType::Stream   },
-    {SOCK_RAW,     SocketType::Raw      },
-    // TODO: are these all possible?
-};
-const std::map<int, Protocol> protocol_map = {
-    {0,             Protocol::Any},
-    {IPPROTO_UDP,   Protocol::UDP},
-    {IPPROTO_TCP,   Protocol::TCP},
-    // TODO: add more protocols
-};
-const std::map<int, AIFlag> flag_map {
-    {AI_PASSIVE,        AIFlag::Passive       },
-    {AI_CANONNAME,      AIFlag::CanonName     },
-    {AI_NUMERICHOST,    AIFlag::NumericHost   },
-    {AI_NUMERICSERV,    AIFlag::NumericServ   },
-    {AI_V4MAPPED,       AIFlag::V4Mapped      },
-    {AI_ALL,            AIFlag::All           },
-    {AI_ADDRCONFIG,     AIFlag::AddrConfig    },
-};
-
-// TODO: probably non-exhaustive lists
-
-const std::map<AddressFamily, std::string> address_family_names = {
-    {AddressFamily::Any,  "AddressFamily::Any"},
-    {AddressFamily::IPv4, "AddressFamily::IPv4"},
-    {AddressFamily::IPv6, "AddressFamily::IPv6"},
-    //{AddressFamily::Unix, "AddressFamily::Unix"},
-};
-const std::map<SocketType, std::string> socket_type_names = {
-    {SocketType::Any,      "SocketType::Any"},
-    {SocketType::Datagram, "SocketType::Datagram"},
-    {SocketType::Stream,   "SocketType::Stream"}
-};
-const std::map<Protocol, std::string> protocol_names = {
-    {Protocol::Any,  "Protocol::Any"},
-    {Protocol::UDP,  "Protocol::UDP"},
-    {Protocol::TCP,  "Protocol::TCP"}
-};
-const std::map<AIFlag, std::string> ai_flag_names = {
-    {AIFlag::Passive,     "AIFlag::Passive"     },
-    {AIFlag::CanonName,   "AIFlag::CanonName"   },
-    {AIFlag::NumericHost, "AIFlag::NumericHost" },
-    {AIFlag::NumericServ, "AIFlag::Numericserv" },
-    {AIFlag::V4Mapped,    "AIFlag::V4Mapped"    },
-    {AIFlag::AddrConfig,  "AIFlag::AddrConfig"  },
-};
-
-std::string to_string(AddressFamily af);
-std::string to_string(SocketType st);
-std::string to_string(Protocol pt);
-std::string to_string(AIFlag f);
-std::string to_string(RecvFlag f);
-std::string to_string(const std::vector<AIFlag> & vf);
-
 class SockAddr {
 public:
     SockAddr() : _len(0), _ss{} { }
-    SockAddr(const struct sockaddr*, socklen_t);
-    SockAddr(const sockaddr_storage & ss, socklen_t l) : _len(l), _ss{ss} { 
-        _ss = ss;
-    }
 
+    // Creates a SockAddr from C-struct. Copies values, since the pointer
+    // may be temporary inside a 'struct addrinfo'.
+    SockAddr(const struct sockaddr*, socklen_t);
+
+    SockAddr(const sockaddr_storage & ss, socklen_t l) : _len(l), _ss{ss} { 
+        if(!AddressFamilyCheck::is_value(family())){
+            auto v = cpp::to_underlying(family());
+            throw std::runtime_error("Unknown family code: " + std::to_string(v));
+        }
+    }
     const struct sockaddr* addr() const;
 
     socklen_t addrlen() const;
@@ -284,22 +164,22 @@ public:
     ssize_t recv(
         uint8_t * buf, 
         ssize_t buflen, 
-        const std::initializer_list<RecvFlag> & f
+        const std::initializer_list<RecvFlag> & fl = {}
     )
     {
-        return ::recv(_sock, reinterpret_cast<unsigned char*>(buf), buflen, cpp::to_int(f));
+        return ::recv(_sock, reinterpret_cast<unsigned char*>(buf), buflen, cpp::to_int(fl));
     }
 
     std::pair<ssize_t, Maybe<SockAddr>> 
-    recvfrom( uint8_t * buf, ssize_t buflen, const std::initializer_list<RecvFlag> & f)
+    recvfrom(uint8_t * buf, ssize_t buflen, const std::initializer_list<RecvFlag> & f = {})
     {
         // If you are using recvfrom, you obviously want these filled in, don't cha?
         struct sockaddr_storage ss = {};
         socklen_t len = sizeof(ss);
 
-        auto ret = ::recvfrom(_sock, (unsigned char*)buf, buflen, cpp::to_int(f),
-               reinterpret_cast<struct sockaddr*>(&ss), &len
-        );
+        auto * sa = reinterpret_cast<struct sockaddr*>(&ss);
+
+        auto ret = ::recvfrom(_sock, buf, buflen, cpp::to_int(f), sa, &len);
 
         return std::make_pair(ret, SockAddr(ss, len));
     }
@@ -307,15 +187,21 @@ public:
     Maybe<SockAddr> getsockname() const;
     Maybe<SockAddr> getpeername() const;
 
-    // needs to be connect()'ed first
-    ssize_t send(const std::string & s, int flags = 0){
-        return ::send(_sock, reinterpret_cast<const void*>(s.data()), s.size(), flags);
+    ssize_t sendto(const uint8_t * buf, size_t len, const SockAddr & dest, const std::initializer_list<SendFlag> & fl = {})
+    {
+        return ::sendto(_sock, buf, len, cpp::to_int(fl), dest.addr(), dest.addrlen());
     }
 
     // needs to be connect()'ed first
-    ssize_t send(const uint8_t *buf, size_t buflen, int flags = 0){
-        return ::send(_sock, reinterpret_cast<const void*>(buf), buflen, flags);
+    ssize_t send(const uint8_t *buf, size_t buflen, const std::initializer_list<SendFlag> & fl = {}){
+        return ::send(_sock, reinterpret_cast<const void*>(buf), buflen, cpp::to_int(fl));
     }
+
+    // needs to be connect()'ed first
+    ssize_t send(const std::string & s, const std::initializer_list<SendFlag> & fl = {}){
+        return send(reinterpret_cast<const uint8_t*>(s.data()), s.size(), fl);
+    }
+
 
     int setsockopt(int level, int optname, const void* optval, socklen_t optlen) {
         // hmmm
@@ -323,8 +209,9 @@ public:
     }
     int getsockopt() ;
 
-    // be careful
-    int fd() { return _sock; }
+    // be careful. EXTREMELY careful. This is just to avoid circular dependencies
+    // with other classes, such as Epoll
+    int __fd() const { return _sock; }
 private:
     int _sock;
 };

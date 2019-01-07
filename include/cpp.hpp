@@ -71,6 +71,14 @@ namespace cpp {
         }
     };
 
+    template <class Checker, typename T>
+    inline cpp::Maybe<typename std::underlying_type<T>::type> _to_integral(T f){
+        if(Checker::is_value(f)){ return cpp::to_underlying(f); } else { return cpp::Nothing(); }
+    }
+    template <class Checker, typename T>
+    inline Maybe<T> _to_enum(int v){
+        if(Checker::is_value(v)){ return static_cast<T>(v); } else { return cpp::Nothing(); }
+    }
 }
 
 template <typename T>

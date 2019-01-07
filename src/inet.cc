@@ -23,30 +23,41 @@ namespace _unix
 namespace inet 
 {
 
+/*
+static const std::map<AddressFamily, const char*> address_family_names = {
+    {
+        {AddressFamily::Any,  "AddressFamily::Any"},
+        {AddressFamily::IPv4, "AddressFamily::IPv4"},
+        {AddressFamily::IPv6, "AddressFamily::IPv6"},
+        //{AddressFamily::Unix, "AddressFamily::Unix"},
+    }
+};
+static const std::map<Protocol, const char*> protocol_names = {
+    {
+        {Protocol::Any,  "Protocol::Any"},
+        {Protocol::UDP,  "Protocol::UDP"},
+        {Protocol::TCP,  "Protocol::TCP"},
+    }
+};
+static const std::map<AIFlag, const char*> ai_flag_names = {
+    {
+        {AIFlag::Passive,     "AIFlag::Passive"     },
+        {AIFlag::CanonName,   "AIFlag::CanonName"   },
+        {AIFlag::NumericHost, "AIFlag::NumericHost" },
+        {AIFlag::NumericServ, "AIFlag::Numericserv" },
+        {AIFlag::V4Mapped,    "AIFlag::V4Mapped"    },
+        {AIFlag::AddrConfig,  "AIFlag::AddrConfig"  },
+    }
+};
+
+static const std::map<RecvFlag, const char*> recv_flag_names = {
+    {
+        {RecvFlag::DontWait, "RecvFlag::DontWait"},
+    }
+};
+*/
+
 using namespace cpp;
-
-template <typename T>
-T cast_or_throw(int v) { throw std::runtime_error("Not impl."); }
-
-template <>
-AddressFamily cast_or_throw(int v){
-    auto it = address_family_map.find(v);
-    if(it == address_family_map.end()){ throw std::runtime_error("Invalid value"); }
-    return it->second;
-}
-template <>
-SocketType cast_or_throw(int v){
-    auto it = socket_type_map.find(v);
-    if(it == socket_type_map.end()){ throw std::runtime_error("Invalid value"); }
-    return it->second;
-}
-template <>
-Protocol cast_or_throw(int v){
-    auto it = protocol_map.find(v);
-    if(it == protocol_map.end()){ throw std::runtime_error("Invalid value"); }
-    return it->second;
-}
-
 
 // int_to_flags 
 int flags_to_int(const std::vector<AIFlag> & fv){
@@ -69,7 +80,7 @@ socklen_t SockAddr::addrlen() const {
 }
 
 AddressFamily SockAddr::family() const {
-    return cast_or_throw<AddressFamily>(_ss.ss_family);
+    return static_cast<AddressFamily>(_ss.ss_family);
 }
 
 // Port numbers can really be enumerated..
@@ -260,21 +271,20 @@ void AddrInfo::reset() {
 std::vector<AIFlag> int_to_flags(int flags);
 
 AddrInfo AddrInfo::from_struct(const struct addrinfo * p){
-    // How to do validation?
-    auto af = address_family_map.find(p->ai_family);
-    auto st = socket_type_map.find(p->ai_socktype);
-    auto pt = protocol_map.find(p->ai_protocol);
+    auto af = to_enum<AddressFamily>(p->ai_family);
+    auto st = to_enum<SocketType>(p->ai_socktype);
+    auto pt = to_enum<Protocol>(p->ai_protocol);
 
-    if(af == address_family_map.end()){
+    if(!af){
         throw std::runtime_error("Invalid address family");
     }
-    if(st == socket_type_map.end()){
+    if(!st){
         throw std::runtime_error("Invalid socket type");
     }
-    if(pt == protocol_map.end()){
+    if(!pt){
         throw std::runtime_error("Invalid protocol");
     }
-    AddrInfo a(af->second, st->second, pt->second, int_to_flags(p->ai_flags));
+    AddrInfo a(*af, *st, *pt, int_to_flags(p->ai_flags));
 
     if(p->ai_addrlen > 0){
         a._sa = SockAddr(p->ai_addr, p->ai_addrlen);
@@ -318,10 +328,16 @@ std::vector<AddrInfo> getAddrInfo(const std::string & host, AddrInfo& hints, uin
 
 std::vector<AIFlag> int_to_flags(int flags) {
     std::vector<AIFlag> fv;
-    for(auto it = flag_map.begin(); it != flag_map.end(); ++it){
-        if(flags & it->first){
-            fv.push_back(it->second);
-            flags &= ~(it->first);
+    for(unsigned i = 0; i < (sizeof(flags) * 8); ++i){
+        int mask =  (0x1 << i);
+        if(flags & mask){
+            auto f = to_enum<AIFlag>(mask);
+            if(!f){
+                std::cerr << "WARNING: skipping unrecognized AIFlag value: " << mask << std::endl;
+                continue;
+            }
+            fv.push_back(*f);
+            flags &= ~mask;
         }
     }
     if(flags){
@@ -334,24 +350,7 @@ std::vector<AIFlag> int_to_flags(int flags) {
     return fv;
 }
 
-
 // A lot of boilerplate, can we somehow merge these?
-std::string to_string(AddressFamily af){ return address_family_names.find(af)->second; }
-std::string to_string(SocketType st){ return socket_type_names.find(st)->second; }
-std::string to_string(Protocol pt){ return protocol_names.find(pt)->second; }
-std::string to_string(AIFlag f){ return ai_flag_names.find(f)->second; }
-std::string to_string(RecvFlag f){ return recv_flag_names.find(f)->second; }
-std::string to_string(const std::vector<AIFlag> & vf){
-    std::stringstream ss;
-    ss << "[";
-    for(size_t i = 0; i < vf.size(); ++i){
-        if(i > 0){ ss << ", "; }
-        ss << to_string(vf[i]);
-    }
-    ss << "]";
-    return ss.str();
-}
-
 Socket::Socket(const AddrInfo & info) :
     Socket(info.family(), info.socket_type(), info.protocol())
 {
