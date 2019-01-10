@@ -208,6 +208,8 @@ public:
     }
     int getsockopt() ;
 
+    bool setblocking(bool val);
+
     // be careful. EXTREMELY careful. This is just to avoid circular dependencies
     // with other classes, such as Epoll
     int __fd() const { return _sock; }

@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <fcntl.h>
 
 #include <iostream>
 #include <sstream>
@@ -362,6 +363,24 @@ int Socket::connect(const AddrInfo & ai){
 	return connect(*ai.sockaddr());
 }
 
+
+bool Socket::setblocking(bool blocking){
+    int opts = fcntl(_sock, F_GETFL);
+    if (opts < 0){
+		std::cerr << "ERROR: fcntl(F_GETFL): " << _unix::errno_str(errno) << "\n";
+		return false;
+    }
+
+    // Turn ON or OFF depending on the parameter value
+    opts = blocking ? (opts & ~O_NONBLOCK) : (opts | O_NONBLOCK);
+
+    if(fcntl(_sock, F_SETFL, opts) < 0){
+        std::cerr << "ERROR: fcntl(F_SETFL): " << _unix::errno_str(errno) << "\n";
+		return false;
+    }
+
+	return true;
+}
 
 
 // a.k.a "passive" socket
