@@ -54,7 +54,9 @@ Usage
 ------
 To compile the example program, run:
 
-    make
+    $ mkdir build && cd build
+    $ cmake ..
+    $ make
 
 
 The topmost namespace is called _unix (originally it was just 'unix', but I figured this is
