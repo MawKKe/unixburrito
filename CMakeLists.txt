@@ -61,6 +61,9 @@ add_library(signals src/signals.cc)
 # For simple one-way demonstration. (NOTE: not proper test programs)
 add_executable(demo src/main.cc)
 
+
+add_custom_target(link_srv ALL COMMAND ${CMAKE_COMMAND} -E create_symlink demo "server")
+add_custom_target(link_cli ALL COMMAND ${CMAKE_COMMAND} -E create_symlink demo "client")
 # -----------------------------------------------------------------------
 # TARGET INCLUDES
 # -----------------------------------------------------------------------
