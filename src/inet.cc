@@ -444,13 +444,13 @@ Maybe<SockAddr> Socket::getpeername() const {
 }
 
 // a.k.a "active" socket
-Maybe<Socket> client_socket_any(
+Maybe<Socket> client_socket_udp(
     const std::string & raddr,
     const std::string & service
 )
 {
     // Defaults, "Any" in all fields. The details will be filled depending on the other side
-    AddrInfo hints;
+    AddrInfo hints(AddressFamily::Any, SocketType::Datagram, Protocol::UDP);
 
     const auto aiv = getAddrInfo(raddr, hints, service);
 

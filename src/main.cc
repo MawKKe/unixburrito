@@ -122,7 +122,7 @@ int client(int argc, const char* argv[]){
 	auto h   = std::string(argv[1]);
 	auto srv = std::string(argv[2]);
 
-	auto _s = unix::inet::client_socket_any(h, srv);
+	auto _s = unix::inet::client_socket_udp(h, srv);
 
 	if(!_s){
 		std::cout << "Error opening socket..." << std::endl;
