@@ -35,7 +35,7 @@ public:
     // may be temporary inside a 'struct addrinfo'.
     SockAddr(const struct sockaddr*, socklen_t);
 
-    SockAddr(const sockaddr_storage & ss, socklen_t l) : _len(l), _ss{ss} { 
+    SockAddr(const sockaddr_storage & ss, socklen_t l) : _len(l), _ss{ss} {
         if(!AddressFamilyCheck::is_value(family())){
             auto v = cpp::to_underlying(family());
             throw std::runtime_error("Unknown family code: " + std::to_string(v));
@@ -69,16 +69,16 @@ public:
         SocketType type  = SocketType::Any,
         Protocol proto   = Protocol::Any,
         const std::vector<AIFlag> & flags = {}
-    ); 
+    );
 
     void set_params(
-        AddressFamily af, 
-        SocketType st, 
+        AddressFamily af,
+        SocketType st,
         Protocol pt,
         const std::vector<AIFlag> & flags
     );
 
-    // You should only pass values defined in the enum classes. 
+    // You should only pass values defined in the enum classes.
     // If you do something silly like set_family(static_cast<AddressFamily>(1234)), then
     // please do not complain that you code went bonkers
     void set_family(AddressFamily af);
@@ -109,13 +109,13 @@ public:
     Maybe<SockAddr> sockaddr()  const;
 
 
-    std::string to_string(int level=0) const; 
+    std::string to_string(int level=0) const;
 
     // Select all fields to default values
-    void reset(); 
+    void reset();
 
     // If you finds yourself needing this function, you are probably doing
-    // something wrong. Normally you should never need this, but let's provide 
+    // something wrong. Normally you should never need this, but let's provide
     // it just in case
 	struct addrinfo to_hints() const;
 
@@ -137,7 +137,7 @@ class Socket {
 public:
     // All sockets are created with information from getAddrInfo().
     //
-    // You should NOT be able to make sockets manually from an integer (socket 
+    // You should NOT be able to make sockets manually from an integer (socket
     // handle / descriptor), so don't even think about writing a Socket::Socket(int fd) !
     Socket(const AddrInfo & info);
 
@@ -163,15 +163,15 @@ public:
     // Type safe version of the ordinary recv and recvfrom
     // Declared in header so the flag-folding can be optimized out at compile time
     ssize_t recv(
-        uint8_t * buf, 
-        ssize_t buflen, 
+        uint8_t * buf,
+        ssize_t buflen,
         const std::initializer_list<RecvFlag> & fl = {}
     )
     {
         return ::recv(_sock, reinterpret_cast<unsigned char*>(buf), buflen, cpp::to_int(fl));
     }
 
-    std::pair<ssize_t, Maybe<SockAddr>> 
+    std::pair<ssize_t, Maybe<SockAddr>>
     recvfrom(uint8_t * buf, ssize_t buflen, const std::initializer_list<RecvFlag> & f = {})
     {
         // If you are using recvfrom, you obviously want these filled in, don't cha?
@@ -220,13 +220,13 @@ private:
 };
 
 std::vector<AddrInfo> getAddrInfo(
-        const std::string & host, 
-        const AddrInfo& ai, 
+        const std::string & host,
+        const AddrInfo& ai,
         const std::string & service
 );
 std::vector<AddrInfo> getAddrInfo(
-        const std::string & host, 
-        AddrInfo& hints, 
+        const std::string & host,
+        AddrInfo& hints,
         uint16_t service
 );
 

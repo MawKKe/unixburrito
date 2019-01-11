@@ -21,12 +21,12 @@
 namespace _unix
 {
 
-namespace inet 
+namespace inet
 {
 
 using namespace cpp;
 
-// int_to_flags 
+// int_to_flags
 int flags_to_int(const std::vector<AIFlag> & fv){
     int flags = 0;
     for(const auto & f : fv){
@@ -169,8 +169,8 @@ socklen_t     AddrInfo::addr_len()    const { return bool(_sa) ? (*_sa).addrlen(
 std::vector<AIFlag> AddrInfo::flags() const { return _flags; }
 
 void AddrInfo::set_params(
-    AddressFamily af, 
-    SocketType st, 
+    AddressFamily af,
+    SocketType st,
     Protocol pt,
     const std::vector<AIFlag> & flags
 ){
@@ -222,8 +222,8 @@ Maybe<std::string> AddrInfo::canonical_name() const {
 Maybe<SockAddr> AddrInfo::sockaddr() const {
     return _sa;
 }
-void AddrInfo::_reset_outvars() { 
-    _cn = Nothing(); 
+void AddrInfo::_reset_outvars() {
+    _cn = Nothing();
     _sa = Nothing();
 }
 
@@ -260,8 +260,8 @@ AddrInfo AddrInfo::from_struct(const struct addrinfo * p){
 }
 
 std::vector<AddrInfo> getAddrInfo(
-        const std::string & host, 
-        const AddrInfo& ai, 
+        const std::string & host,
+        const AddrInfo& ai,
         const std::string & service
 ){
     std::vector<AddrInfo> v;
@@ -308,9 +308,9 @@ std::vector<AIFlag> int_to_flags(int flags) {
         }
     }
     if(flags){
-        std::cerr 
-            << "WARNING -AddrIinfoHint::flags(): Uknown ai_flags remaining:" 
-            << flags << "\n"; 
+        std::cerr
+            << "WARNING -AddrIinfoHint::flags(): Uknown ai_flags remaining:"
+            << flags << "\n";
     }
 
     std::sort(fv.begin(), fv.end());
@@ -412,8 +412,8 @@ Maybe<Socket> server_socket_udp(
             continue;
         }
     }
-    std::cerr 
-        << "ERROR: could not create socket for '" 
+    std::cerr
+        << "ERROR: could not create socket for '"
         << laddr << ":" << service << "'" << std::endl;
     return Nothing();
 }

@@ -17,11 +17,11 @@ namespace inet {
 // mistakes from creeping into the code.
 
 // There are a LOT of address families, but here are the most common
-enum class AddressFamily : uint32_t { 
-    Any     = AF_UNSPEC, 
-    IPv4    = AF_INET, 
-    IPv6    = AF_INET6, 
-    /* Unix = AF_UNIX */ 
+enum class AddressFamily : uint32_t {
+    Any     = AF_UNSPEC,
+    IPv4    = AF_INET,
+    IPv6    = AF_INET6,
+    /* Unix = AF_UNIX */
 };
 using AddressFamilyCheck = cpp::EnumCheck<AddressFamily,
       AddressFamily::Any,
@@ -29,7 +29,7 @@ using AddressFamilyCheck = cpp::EnumCheck<AddressFamily,
       AddressFamily::IPv6>;
 
 enum class SocketType : uint32_t {
-    Any         = 0, 
+    Any         = 0,
     Datagram    = SOCK_DGRAM,
     Stream      = SOCK_STREAM,
     Raw         = SOCK_RAW,
@@ -51,7 +51,7 @@ using ProtocolCheck = cpp::EnumCheck<Protocol,
       Protocol::TCP>;
 
 enum class AIFlag : uint32_t {
-    // Even though these are enumerated, they are not mutually exclusive (like the 
+    // Even though these are enumerated, they are not mutually exclusive (like the
     // other enums are)
     // TODO: probably non-exhaustive list. Check you OS's include files for more flags...
     Passive     = AI_PASSIVE,

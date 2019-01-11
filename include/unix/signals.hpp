@@ -74,7 +74,7 @@ namespace _unix {
     class SigAction;
     int sigaction(Signal signum, const SigAction & newact);
 
-    class SigAction 
+    class SigAction
     {
         using HandlerType1 = void (*)(int);
         using HandlerType2 = void (*)(int, siginfo_t *, void *);
@@ -94,7 +94,7 @@ namespace _unix {
         static SigAction fullSet()  { SigAction sa; sa._fill();  return sa; }
 
 
-        // The different handler types are mutually exclusive, but fortunately these 
+        // The different handler types are mutually exclusive, but fortunately these
         // overloaded setup funcs will handle all details for you!
         void set_handler(HandlerType1 h);
         void set_handler(HandlerType2 h);
@@ -155,7 +155,7 @@ namespace _unix {
 	//  }
 	//
 	template <typename H>
-	int handleInterrupt(H h) { 
+	int handleInterrupt(H h) {
 		SigAction sa = SigAction::emptySet();
 		sa.set_handler(h);
 

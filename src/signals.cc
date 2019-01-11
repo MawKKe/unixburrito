@@ -37,7 +37,7 @@ namespace _unix {
         _set_siginfo(true);
     }
 
-    void SigAction::_clear() { 
+    void SigAction::_clear() {
         if(::sigemptyset(&_act.sa_mask) != 0){
             throw std::runtime_error("sigemptyset() failed: " + _unix::errno_str(errno));
         }
@@ -69,7 +69,7 @@ namespace _unix {
     void SigAction::set_flags(const std::initializer_list<SigActionFlag> & fl){
         for(const auto & e : fl){
             if(e == SigActionFlag::IncludeSigInfo){
-                std::cerr 
+                std::cerr
                     << "WARNING: SigAction::set_flags(): "
                     << "ignoring flag SigActionFlag::IncludeSigInfo (SA_SIGINFO)" << std::endl;
                 continue;
@@ -127,7 +127,7 @@ namespace _unix {
         first = true;
         for(const auto & p : sigaction_map){
             if(_act.sa_flags & p.first){
-                if(!first) ss << ", "; 
+                if(!first) ss << ", ";
                 ss << _unix::signals::to_string(p.second);
                 first = false;
             }
