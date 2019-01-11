@@ -53,7 +53,9 @@ public:
     std::string address() const;
     std::string to_string(int level=0) const;
 
+    std::string address_and_port() const { return address() + std::to_string(port()); }
 
+    bool operator==(const SockAddr o){ return o.address() == address() && o.port() == port(); }
 private:
     socklen_t _len;
     struct sockaddr_storage _ss;
