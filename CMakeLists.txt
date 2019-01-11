@@ -83,6 +83,15 @@ PUBLIC
 # -----------------------------------------------------------------------
 target_link_libraries(demo inet signals)
 
+# Let's change the generated file names to something descriptive and less
+# prone to collisions.
+#
+#   For example:, "libinet.a" will now be called "libunixburrito_inet.a"
+#
+# Hint for future: Don't replace PREFIX, all *nix tools expect "lib"-prefix.
+set_target_properties(inet    PROPERTIES OUTPUT_NAME "unixburrito_inet")
+set_target_properties(signals PROPERTIES OUTPUT_NAME "unixburrito_signals")
+
 ####
 # Properties of targets
 
