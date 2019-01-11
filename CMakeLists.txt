@@ -37,14 +37,20 @@
 # Set minimum version of CMake.
 cmake_minimum_required(VERSION 3.5) # GENERATOR_IS_MULTI_CONFIG
 
-project(unixburrito VERSION 0.0.1)
+project(unixburrito VERSION 0.0.1 LANGUAGES CXX)
 
 # Common compiler definitions
 add_compile_options(-std=c++14)
 add_compile_options(-Wall)
 add_compile_options(-Wextra)
 add_compile_options(-pedantic)
+add_compile_options(-frecord-gcc-switches) # read with "readelf -p .GCC.command.line <binary>"
 
+# NOTE: If you wish to debug, run:
+#
+#   $ cmake .. -DCMAKE_BUILD_TYPE=Debug
+#   $ make
+#
 
 # Create targets
 #add_library(bar "Source/foo/Bar.cpp" "Source/foo/Bar.hpp")
