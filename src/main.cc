@@ -83,7 +83,25 @@ int server(int argc, const char* argv[]){
 
     auto epoll = Epoll();
 
-    epoll.add(s, {EpollEventType::Input, EpollEventType::EdgeTrigger});
+    // this data can be anything.
+    // NOTE: later in the loop, you will receive a bunch of epoll_event structs.
+    // These will have the union value filled in, but you have no way of knowing which one it is,
+    // other that just "knowing" in advance...
+
+
+    uint32_t stream_number_1 = 0x123;
+
+    // for example:
+    std::map<int, EpollUserData> input_map;
+    input_map[s.__fd()].set_u32(stream_number_1);
+
+    // epoll_add[streams[0].fd()].set_u32(streams[0].streamno())
+    // input_map[streams[1].fd()].set_u32(streams[1].streamno())
+    // ..later...
+    // for(...)
+    //      streams[evts[i].data.u32].recv(...)
+
+    epoll.add(s, {EpollEventType::Input, EpollEventType::EdgeTrigger}, input_map[s.__fd()]);
 
     using namespace std::chrono_literals;
 
@@ -100,7 +118,7 @@ int server(int argc, const char* argv[]){
             std::cerr << "epoll_wait returned: " << n_ev << std::endl;
         }
         for(int i = 0; i < n_ev; ++i){
-            if(evts[i].matches(s) && (evts[i] & EpollEventType::Input)){
+            if(evts[i].matches_u32(stream_number_1) && (evts[i] & EpollEventType::Input)){
                 handle_in(s);
             }
             else{
