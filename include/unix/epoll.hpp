@@ -9,6 +9,7 @@
 #include <unix/inet.hpp>
 
 namespace _unix {
+
 namespace epoll {
 
 enum class EpollCtrlOperation {
@@ -71,41 +72,41 @@ class EpollUserData {
         U64
     };
 
-    public:
-        EpollUserData() { _tag = UserDataType::Unset; }
+public:
+    EpollUserData() { _tag = UserDataType::Unset; }
 
-        // The C++ overloading is cool but breaks down with very similar types
-        // (iirc the eager implicit casting bites you in the ass very easily).
-        // Let's be explicit for the sake of it.
-        void set_ptr(void * ptr)   { u.ptr = ptr; _tag = UserDataType::Pointer;  }
-        void set_fd(int fd)        { u.fd  = fd;  _tag = UserDataType::FileDesc; }
-        void set_u32(uint32_t v)   { u.u32 = v;   _tag = UserDataType::U32; }
-        void set_u64(uint64_t v)   { u.u64 = v;   _tag = UserDataType::U64; }
+    // The C++ overloading is cool but breaks down with very similar types
+    // (iirc the eager implicit casting bites you in the ass very easily).
+    // Let's be explicit for the sake of it.
+    void set_ptr(void * ptr)   { u.ptr = ptr; _tag = UserDataType::Pointer;  }
+    void set_fd(int fd)        { u.fd  = fd;  _tag = UserDataType::FileDesc; }
+    void set_u32(uint32_t v)   { u.u32 = v;   _tag = UserDataType::U32; }
+    void set_u64(uint64_t v)   { u.u64 = v;   _tag = UserDataType::U64; }
 
-        // union epoll_data_t typedef in sys/epoll.h
-        void assign_to(struct epoll_event & ev) const {
-            switch (_tag){
-                case UserDataType::Pointer:  ev.data.ptr = u.ptr; break;
-                case UserDataType::FileDesc: ev.data.fd  = u.fd;  break;
-                case UserDataType::U32:      ev.data.u32 = u.u32; break;
-                case UserDataType::U64:      ev.data.u64 = u.u64; break;
-                default: throw std::runtime_error("Unknown or Unset Epoll user data type"); // dumbass
-            }
+    // union epoll_data_t typedef in sys/epoll.h
+    void assign_to(struct epoll_event & ev) const {
+        switch (_tag){
+            case UserDataType::Pointer:  ev.data.ptr = u.ptr; break;
+            case UserDataType::FileDesc: ev.data.fd  = u.fd;  break;
+            case UserDataType::U32:      ev.data.u32 = u.u32; break;
+            case UserDataType::U64:      ev.data.u64 = u.u64; break;
+            default: throw std::runtime_error("Unknown or Unset Epoll user data type"); // dumbass
         }
-    private:
-        UserDataType _tag;
-        union {
-            void * ptr;
-            int fd;
-            uint32_t u32;
-            uint64_t u64;
-        } u;
+    }
+private:
+    UserDataType _tag;
+    union {
+        void * ptr;
+        int fd;
+        uint32_t u32;
+        uint64_t u64;
+    } u;
 };
 
 class Epoll {
 public:
     Epoll(const std::initializer_list<EpollFlag> & fl = {})
-        : _efd(epoll_create1(cpp::to_int(fl)))
+    : _efd(epoll_create1(cpp::to_int(fl)))
     {
         if(_efd < 0){
             auto m = _unix::errno_str(errno);

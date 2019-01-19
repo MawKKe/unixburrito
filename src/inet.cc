@@ -122,7 +122,7 @@ AddrInfo::AddrInfo(
     reset();
     set_family(af);
     set_socktype(type);
-	set_protocol(proto);
+    set_protocol(proto);
     for(auto & f : flags){
         set_flag(f);
     }
@@ -344,23 +344,23 @@ int Socket::bind(const AddrInfo & ai){
     if(!ai.sockaddr()){
         throw std::runtime_error("Trying to bind() without a sockaddr!");
     }
-	return bind(*ai.sockaddr());
+    return bind(*ai.sockaddr());
 }
 
 int Socket::connect(const SockAddr & sa){
-	int ret = ::connect(_sock, sa.addr(), sa.addrlen());
-	if(ret < 0){
-		perror("connect()");
-		//std::cerr << "ERRROR: connect(): " << _unix::errno_str(errno) << std::endl;
-	}
-	return ret;
+    int ret = ::connect(_sock, sa.addr(), sa.addrlen());
+    if(ret < 0){
+        perror("connect()");
+        //std::cerr << "ERRROR: connect(): " << _unix::errno_str(errno) << std::endl;
+    }
+    return ret;
 }
 
 int Socket::connect(const AddrInfo & ai){
-	if(!ai.sockaddr()){
+    if(!ai.sockaddr()){
         throw std::runtime_error("Trying to connect() without a sockaddr!");
-	}
-	return connect(*ai.sockaddr());
+    }
+    return connect(*ai.sockaddr());
 }
 
 
@@ -379,7 +379,7 @@ bool Socket::setblocking(bool blocking){
 		return false;
     }
 
-	return true;
+    return true;
 }
 
 
