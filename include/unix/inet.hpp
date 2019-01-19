@@ -64,7 +64,7 @@ private:
 class AddrInfo {
 public:
 
-	AddrInfo(
+    AddrInfo(
         AddressFamily af = AddressFamily::Any,
         SocketType type  = SocketType::Any,
         Protocol proto   = Protocol::Any,
@@ -84,7 +84,7 @@ public:
     void set_family(AddressFamily af);
     void set_socktype(SocketType st);
     void set_protocol(Protocol proto);
-	void set_flag(AIFlag f);
+    void set_flag(AIFlag f);
     void set_flags(const std::vector<AIFlag> & fv);
 
     // Since an object of this class should not be possible to construct
@@ -117,7 +117,7 @@ public:
     // If you finds yourself needing this function, you are probably doing
     // something wrong. Normally you should never need this, but let's provide
     // it just in case
-	struct addrinfo to_hints() const;
+    struct addrinfo to_hints() const;
 
     static AddrInfo from_struct(const struct addrinfo * p);
 
