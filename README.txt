@@ -88,3 +88,10 @@ integral range, the range may have gaps, which means you must keep manual track 
 symbols...
 
 
+License
+-------
+
+unixburrito is released under the MIT license.
+
+A copy of the license is found in file LICENSE.txt at the root of the project tree.
+
