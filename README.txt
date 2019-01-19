@@ -87,6 +87,7 @@ is an actual symbol. Although you can check wether the value is between the min 
 integral range, the range may have gaps, which means you must keep manual track of all the possible
 symbols...
 
+---
 
 License
 -------
