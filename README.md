@@ -55,8 +55,18 @@ To compile the example program, run:
     $ cmake ..
     $ make
 
+If you use `cmake` with your project, just add
 
-The topmost namespace is called _unix (originally it was just 'unix', but I figured this is
+    find_package(unixburrito 0.0.1 REQUIRED)
+
+..to your CMakeListst.txt. Now you should be to compile and link without any additional install step.
+Dependencies (search path, link information) are automatically handled by `cmake`.
+
+Headers you want to include are found under the `unix` directory. For example:
+
+    #include <unix/inet.hpp>
+
+The topmost namespace is called `_unix` (originally it was just 'unix', but I figured this is
 a common name, and it may cause colisions). If you want an alias for this name, you can do
 something like this:
 
@@ -78,7 +88,7 @@ Limitation of enum classes
 The new (C++11) enum class feature takes the ordinary enums into the direction of algebraic types.
 However, the enum classes are still bound to an underlying integral type. The enum class values
 are not implicitly converted to integers and back (like ordinary enums are), but can be explicitly if necessary.
-Better type safety makes enum class values more "symbolic" than previous enums., and help you write
+Better type safety makes enum class values more "symbolic" than previous enums, which helps you write
 more robust code.
 
 However, they are not without dangers, as any symbolic type safety can be
