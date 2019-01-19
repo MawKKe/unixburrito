@@ -11,6 +11,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <cassert>
 
 #include <iostream>
 #include <algorithm>
@@ -29,18 +30,10 @@ using namespace cpp;
 
 class SockAddr {
 public:
-    SockAddr() : _len(0), _ss{} { }
 
-    // Creates a SockAddr from C-struct. Copies values, since the pointer
-    // may be temporary inside a 'struct addrinfo'.
-    SockAddr(const struct sockaddr*, socklen_t);
+    static Maybe<SockAddr> from_struct(const struct sockaddr_storage &, socklen_t, bool verify=true);
+    static Maybe<SockAddr> from_struct(const struct sockaddr *, socklen_t, bool verify=true);
 
-    SockAddr(const sockaddr_storage & ss, socklen_t l) : _len(l), _ss{ss} {
-        if(!AddressFamilyCheck::is_value(family())){
-            auto v = cpp::to_underlying(family());
-            throw std::runtime_error("Unknown family code: " + std::to_string(v));
-        }
-    }
     const struct sockaddr* addr() const;
 
     socklen_t addrlen() const;
@@ -57,6 +50,15 @@ public:
 
     bool operator==(const SockAddr o){ return o.address() == address() && o.port() == port(); }
 private:
+    // Don't make it directly. Let other interfaces create SockAddrs for you.
+    SockAddr();
+
+    // Creates SockAddr from C-struct types. Copies values, since the pointer may point to some
+    // temporary memory. Does not perform any validation, that is left for the from_struct class
+    // functions.
+    SockAddr(const sockaddr_storage & ss, socklen_t l) : _len(l), _ss{ss} { }
+    SockAddr(const struct sockaddr * p, socklen_t l) : _len(l), _ss{} { memcpy(&_ss, p, l); }
+
     socklen_t _len;
     struct sockaddr_storage _ss;
 };
@@ -182,7 +184,7 @@ public:
 
         auto ret = ::recvfrom(_sock, buf, buflen, cpp::to_int(f), sa, &len);
 
-        return std::make_pair(ret, SockAddr(ss, len));
+        return std::make_pair(ret, SockAddr::from_struct(ss, len));
     }
 
     Maybe<SockAddr> getsockname() const;

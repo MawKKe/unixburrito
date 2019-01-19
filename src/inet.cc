@@ -35,9 +35,6 @@ int flags_to_int(const std::vector<AIFlag> & fv){
     return flags;
 }
 
-SockAddr::SockAddr(const struct sockaddr* sa, socklen_t len) : _len(len), _ss{} {
-    memcpy(&_ss, sa, len);
-}
 
 const struct sockaddr* SockAddr::addr() const {
     return reinterpret_cast<const struct sockaddr*>(&_ss);
@@ -68,7 +65,6 @@ uint16_t SockAddr::port() const {
         }
     }
 }
-
 
 std::string SockAddr::address() const {
     char buf[INET6_ADDRSTRLEN+1];
@@ -254,7 +250,7 @@ AddrInfo AddrInfo::from_struct(const struct addrinfo * p){
     AddrInfo a(*af, *st, *pt, int_to_flags(p->ai_flags));
 
     if(p->ai_addrlen > 0){
-        a._sa = SockAddr(p->ai_addr, p->ai_addrlen);
+        a._sa = SockAddr::from_struct(p->ai_addr, p->ai_addrlen, false);
     }
     return a;
 }
@@ -430,7 +426,7 @@ Maybe<SockAddr> Socket::getsockname() const {
 		std::cerr << "ERROR getsockname(): " << _unix::errno_str(errno) << std::endl;
 		return Nothing();
 	}
-	return SockAddr(ss, len);
+	return SockAddr::from_struct(ss, len, false);
 }
 Maybe<SockAddr> Socket::getpeername() const {
 	struct sockaddr_storage ss;
@@ -440,7 +436,7 @@ Maybe<SockAddr> Socket::getpeername() const {
 		std::cerr << "ERROR getpeername(): " << _unix::errno_str(errno) << std::endl;
 		return Nothing();
 	}
-	return SockAddr(ss, len);
+	return SockAddr::from_struct(ss, len, false);
 }
 
 // a.k.a "active" socket
@@ -487,6 +483,37 @@ std::ostream & operator<<(std::ostream & os, const _unix::inet::AddrInfo & a){
 std::ostream & operator<<(std::ostream & os, const _unix::inet::SockAddr & a){
     os << a.to_string();
 	return os;
+}
+
+Maybe<SockAddr> SockAddr::from_struct(const struct sockaddr_storage & ss, socklen_t len, bool verify){
+    if(!verify){
+        return SockAddr(ss, len);
+    }
+    if(len < 2){
+        return Nothing();
+    }
+    auto fam = ss.ss_family;
+    auto f = AddressFamilyCheck::to_enum(fam);
+    if(!f && *f == AddressFamily::Any){
+        return Nothing();
+    }
+    return SockAddr(ss, len);
+}
+
+Maybe<SockAddr> SockAddr::from_struct(const struct sockaddr * p, socklen_t len, bool verify){
+    assert(p != nullptr);
+    if(!verify){
+        return SockAddr(p, len);
+    }
+    if(len < 2){
+        return Nothing();
+    }
+    auto fam = p->sa_family;
+    auto f = AddressFamilyCheck::to_enum(fam);
+    if(!f && *f == AddressFamily::Any){
+        return Nothing();
+    }
+    return SockAddr(p, len);
 }
 
 

@@ -69,6 +69,15 @@ namespace cpp {
         {
             return v == static_cast<IntType>(V) || super::is_value(v);
         }
+
+        template <typename IntType>
+        static Maybe<EnumType> to_enum(IntType v)
+        {
+            if(super::is_value(v)){
+                return static_cast<EnumType>(v);
+            }
+            return Nothing();
+        }
     };
 
     template <class Checker, typename T>
