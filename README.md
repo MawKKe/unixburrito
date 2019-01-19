@@ -45,6 +45,9 @@ such as std::optional (std::experimental::optional with C++14) which might not b
 supported by all compilers.
 
 
+**NOTE**: this project is in its initial stages; interfaces are very much unstable.
+Use at your own risk.
+
 ---
 
 Usage
