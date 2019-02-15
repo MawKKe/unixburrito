@@ -510,7 +510,7 @@ Maybe<SockAddr> SockAddr::from_struct(const struct sockaddr * p, socklen_t len, 
     }
     auto fam = p->sa_family;
     auto f = AddressFamilyCheck::to_enum(fam);
-    if(!f && *f == AddressFamily::Any){
+    if(!f || *f == AddressFamily::Any){
         return Nothing();
     }
     return SockAddr(p, len);
