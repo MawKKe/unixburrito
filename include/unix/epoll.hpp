@@ -45,10 +45,10 @@ public:
     }
 };
 
-bool operator&(const EpollEvent & ev, EpollEventType et){
+inline bool operator&(const EpollEvent & ev, EpollEventType et){
     return ev.events & cpp::to_underlying(et);
 }
-bool operator&(EpollEventType et, const EpollEvent & ev){
+inline bool operator&(EpollEventType et, const EpollEvent & ev){
     return ev & et;
 }
 
