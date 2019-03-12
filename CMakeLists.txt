@@ -39,18 +39,16 @@ cmake_minimum_required(VERSION 3.5) # GENERATOR_IS_MULTI_CONFIG
 
 project(unixburrito VERSION 0.0.1 LANGUAGES CXX)
 
+set(CMAKE_CXX_STANDARD 14)          # c++14 for now, might move to c++17 in the future
+set(CMAKE_CXX_EXTENSIONS OFF)       # the default is to use -std=gnu++XX, which broke my build :( this opt makes the compiler use the "ordinary one"
+set(CMAKE_CXX_STANDARD_REQUIRED ON) # prevents the standard version from "decaying" to older one if the compiler does not support the current one
+                                    # Use newer compiler, you fool. Docker is here, you have no excuses.
+
 # Common compiler definitions
-add_compile_options(-std=c++14)
 add_compile_options(-Wall)
 add_compile_options(-Wextra)
 add_compile_options(-pedantic)
-add_compile_options(-frecord-gcc-switches) # read with "readelf -p .GCC.command.line <binary>"
-
-# NOTE: If you wish to debug, run:
-#
-#   $ cmake .. -DCMAKE_BUILD_TYPE=Debug
-#   $ make
-#
+add_compile_options(-frecord-gcc-switches) # invoke "readelf -p .GCC.command.line <binary>" to see all compile time flags
 
 # Create targets
 #add_library(bar "Source/foo/Bar.cpp" "Source/foo/Bar.hpp")
@@ -234,17 +232,12 @@ export(EXPORT "${TARGETS_EXPORT_NAME}" FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET
 
 export(PACKAGE ${PROJECT_NAME})
 
-
 # Tests? ---------------------------------------------------
 
-# Gmock will include gtest?
-#add_subdirectory(/usr/src/gmock ./gmock)
-#include_directories(/usr/include/gmock)
-find_package(GTest REQUIRED)
-
-ENABLE_TESTING()
-
 # TODO
+#include(${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.gtest.txt)
+#ENABLE_TESTING()
+
 #add_executable(test_inet    tests/main.cc tests/test_inet.cc)
 #add_executable(test_signals tests/main.cc tests/test_signals.cc)
 #add_executable(test_epoll  tests/main.cc tests/test_epoll.cc)
