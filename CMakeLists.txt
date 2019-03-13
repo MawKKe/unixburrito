@@ -45,10 +45,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON) # prevents the standard version from "decayi
                                     # Use newer compiler, you fool. Docker is here, you have no excuses.
 
 # Common compiler definitions
-add_compile_options(-Wall)
-add_compile_options(-Wextra)
-add_compile_options(-pedantic)
-add_compile_options(-frecord-gcc-switches) # invoke "readelf -p .GCC.command.line <binary>" to see all compile time flags
+#add_compile_options(-Wall)
+#add_compile_options(-Wextra)
+#add_compile_options(-pedantic)
+#add_compile_options(-frecord-gcc-switches) # invoke "readelf -p .GCC.command.line <binary>" to see all compile time flags
 
 # Create targets
 #add_library(bar "Source/foo/Bar.cpp" "Source/foo/Bar.hpp")
@@ -65,6 +65,8 @@ add_library(signals src/signals.cc)
 # For simple one-way demonstration. (NOTE: not proper test programs)
 add_executable(demo src/main.cc)
 
+add_library(UnixBurrito::inet ALIAS inet)
+add_library(UnixBurrito::signals ALIAS signals)
 
 add_custom_target(link_srv ALL COMMAND ${CMAKE_COMMAND} -E create_symlink demo "server")
 add_custom_target(link_cli ALL COMMAND ${CMAKE_COMMAND} -E create_symlink demo "client")
@@ -145,64 +147,64 @@ set_target_properties(${PROJET_NAME} PROPERTIES EXPORT_NAME UnixBurrito)
 # * CMAKE_INSTALL_LIBDIR
 # * CMAKE_INSTALL_BINDIR
 # * CMAKE_INSTALL_INCLUDEDIR
-include(GNUInstallDirs)
+#include(GNUInstallDirs)
 
 # Layout. This works for all platforms:
 #   * <prefix>/lib*/cmake/<PROJECT-NAME>
 #   * <prefix>/lib*/
 #   * <prefix>/include/
-set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+#set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 
-set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}")
+#set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
 # Configuration
-set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
-set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
-set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
-set(namespace "${PROJECT_NAME}::")
+#set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
+#set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
+#set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
+#set(namespace "${PROJECT_NAME}::")
 
 # Include module with fuction 'write_basic_package_version_file'
-include(CMakePackageConfigHelpers)
+#include(CMakePackageConfigHelpers)
 
 # Configure '<PROJECT-NAME>ConfigVersion.cmake'
 # Use:
 #   * PROJECT_VERSION
-write_basic_package_version_file(
-    "${version_config}" COMPATIBILITY SameMajorVersion
-)
+#write_basic_package_version_file(
+#    "${version_config}" COMPATIBILITY SameMajorVersion
+#)
 
 # Configure '<PROJECT-NAME>Config.cmake'
 # Use variables:
 #   * TARGETS_EXPORT_NAME
 #   * PROJECT_NAME
-configure_package_config_file(
-    "cmake/Config.cmake.in"
-    "${project_config}"
-    INSTALL_DESTINATION "${config_install_dir}"
-)
+#configure_package_config_file(
+#    "cmake/Config.cmake.in"
+#    "${project_config}"
+#    INSTALL_DESTINATION "${config_install_dir}"
+#)
 
 # Targets:
 #   * <prefix>/lib/libbar.a
 #   * <prefix>/lib/libbaz.a
 #   * header location after install: <prefix>/include/foo/Bar.hpp
 #   * headers can be included by C++ code `#include <foo/Bar.hpp>`
-install(
-    TARGETS inet signals
-    EXPORT "${TARGETS_EXPORT_NAME}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-    INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-)
+#install(
+#    TARGETS inet signals
+#    EXPORT "${TARGETS_EXPORT_NAME}"
+#    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+#    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+#    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+#    INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+#)
 
 # Headers:
 #   * Source/foo/Bar.hpp -> <prefix>/include/foo/Bar.hpp
 #   * Source/foo/Baz.hpp -> <prefix>/include/foo/Baz.hpp
-install(
-    DIRECTORY "include"
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-    FILES_MATCHING PATTERN "*.hpp"
-)
+#install(
+#    DIRECTORY "include"
+#    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+#    FILES_MATCHING PATTERN "*.hpp"
+#)
 
 # Export headers:
 #   * ${CMAKE_CURRENT_BINARY_DIR}/.../BAR_EXPORT.h -> <prefix>/include/foo/BAR_EXPORT.h
@@ -215,22 +217,24 @@ install(
 # Config
 #   * <prefix>/lib/cmake/Foo/FooConfig.cmake
 #   * <prefix>/lib/cmake/Foo/FooConfigVersion.cmake
-install(
-    FILES "${project_config}" "${version_config}"
-    DESTINATION "${config_install_dir}"
-)
+#install(
+#    FILES "${project_config}" "${version_config}"
+#    DESTINATION "${config_install_dir}"
+#)
 
 # Config
 #   * <prefix>/lib/cmake/Foo/FooTargets.cmake
-install(
-    EXPORT "${TARGETS_EXPORT_NAME}"
-    NAMESPACE "${namespace}"
-    DESTINATION "${config_install_dir}"
-)
+#install(
+#    EXPORT "${TARGETS_EXPORT_NAME}"
+#    NAMESPACE "${namespace}"
+#    DESTINATION "${config_install_dir}"
+#)
 
-export(EXPORT "${TARGETS_EXPORT_NAME}" FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGETS_EXPORT_NAME}.cmake NAMESPACE ${namespace})
+#export(EXPORT "${TARGETS_EXPORT_NAME}" FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGETS_EXPORT_NAME}.cmake NAMESPACE ${namespace})
 
-export(PACKAGE ${PROJECT_NAME})
+#export(PACKAGE ${PROJECT_NAME})
+
+
 
 # Tests? ---------------------------------------------------
 
