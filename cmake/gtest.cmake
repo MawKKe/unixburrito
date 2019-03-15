@@ -3,7 +3,7 @@
 #--------------------------------------------------------------------------
 # googletest
 # Download and unpack googletest at configure time
-configure_file(CMakeLists.gtest-download.txt  ext/googletest-download/CMakeLists.txt)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/gtest-download.cmake ext/googletest-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
   RESULT_VARIABLE result
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ext/googletest-download )
@@ -34,9 +34,4 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
   include_directories("${gtest_SOURCE_DIR}/include")
 endif()
 
-# Now simply link against gtest or gtest_main as needed. Eg
-add_executable(example samples/sample4_unittest.cc samples/sample4.cc)
-target_link_libraries(example gtest_main)
-add_test(NAME example_test COMMAND example)
-# end googletest
 #--------------------------------------------------------------------------
