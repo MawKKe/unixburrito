@@ -182,8 +182,8 @@ int main(int argc, const char *argv[])
 		exit(1);
 	}
 
-    unix::sched::CPUSet a;
-    unix::sched::CPUSet b;
+    unix::affinity::CPUSet a;
+    unix::affinity::CPUSet b;
 
     a.set(0);
     b.set(0);
@@ -208,7 +208,7 @@ int main(int argc, const char *argv[])
 
     auto e = a & b;
 
-    auto x = unix::sched::CPUSet({1,2,3,4,5});
+    auto x = unix::affinity::CPUSet({1,2,3,4,5});
 
 
     std::cout << a << "\n";
@@ -219,20 +219,66 @@ int main(int argc, const char *argv[])
     std::cout << x << "\n";
 
 
+    using namespace std::chrono_literals;
+
+    std::thread thr([]() {
+        uint16_t i = 0;
+        while(run){
+            std::cout << "thread: " << i++ << "\n"; std::this_thread::sleep_for(1s);
+            unix::affinity::CPUSet localset;
+            unix::affinity::affinity_get(localset);
+            std::cout << "thread (inside) cpuset: " << localset << "\n";
+        }
+    });
+
     std::string progname(argv[0]);
+
+    unix::affinity::CPUSet localset, mainset;
+
+    //Schedaffinity_set(unix::CPUSet({0}));
+    unix::affinity::affinity_set({0});
+
+    unix::affinity::affinity_get_thread(thr, localset);
+
+    unix::affinity::affinity_get(mainset);
+
+    std::cout << "mainset: " << mainset << "\n";
+
+    std::vector<int> v = {0,1,2};
+
+    unix::affinity::affinity_set(v);
+
+    std::cout << "thread cpuset (main, before): " << localset << "\n";
+
+    std::this_thread::sleep_for(10s);
+
+    unix::affinity::affinity_set_thread(thr, {1});
+
+    unix::affinity::affinity_get_thread(thr, localset);
+
+    std::cout << "thread cpuset (main, after): " << localset << "\n";
+
+    std::cout << "mainset: " << mainset << "\n";
 
     std::cout << "progname: " << progname << std::endl;
 
+    int ret = 0;
     if(cpp::element_in(progname, {"server", "./server"})){
-        return server(argc, argv);
+        ret = server(argc, argv);
     }
     else if(cpp::element_in(progname, {"client", "./client"})){
-        return client(argc, argv);
+        ret = client(argc, argv);
     }
     else{
         std::cout << "unknown progname: " << progname << "\n";
-        exit(1);
+        run = false;
+        ret = -1;
     }
 
-    return 0;
+    std::cout << "waiting.. \n";
+    thr.join();
+    std::cout << "joined. Exiting.\n";
+    return ret;
+
+
 }

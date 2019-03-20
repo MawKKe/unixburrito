@@ -6,6 +6,8 @@
 
 namespace _unix {
 
+namespace affinity {
+
 void CPUSet::zero()         { CPU_ZERO(&m_set); }
 void CPUSet::set(int cpu)   { check("set()",   cpu); CPU_SET(cpu, &m_set); }
 void CPUSet::unset(int cpu) { check("unset()", cpu); CPU_SET(cpu, &m_set); }
@@ -58,7 +60,7 @@ bool CPUSet::operator!=(const CPUSet & o) const {
 std::string CPUSet::repr() const {
     auto cpus = cpu_list();
     std::stringstream ss;
-    ss << "CPUSet: {";
+    ss << "CPUSet {";
     for(size_t i = 0; i < cpus.size(); ++i){
         if(i > 0){ ss << ", "; }
         ss << cpus[i];
@@ -76,9 +78,28 @@ void CPUSet::check(std::string func, int cpu) const{
     }
 }
 
+int affinity_set_thread(std::thread & t, const CPUSet & cs){
+    return ::pthread_setaffinity_np(t.native_handle(), sizeof(cs.m_set), &cs.m_set);
+}
+
+int affinity_get_thread(std::thread & t, CPUSet & cs){
+    cs.zero();
+    return ::pthread_getaffinity_np(t.native_handle(), sizeof(cs.m_set), &cs.m_set);
+}
+
+int affinity_set(pid_t pid, const CPUSet & cs){
+    return ::sched_setaffinity(pid, sizeof(cs.m_set), &cs.m_set);
+}
+
+int affinity_get(pid_t pid, CPUSet & cs){
+    cs.zero();
+    return ::sched_getaffinity(pid, sizeof(cs.m_set), &cs.m_set);
+}
+
+} // ns affinity
 } // ns _unix
 
-std::ostream& operator<<(std::ostream& os, const _unix::CPUSet & cs){
+std::ostream& operator<<(std::ostream& os, const _unix::affinity::CPUSet & cs){
     os << cs.repr();
     return os;
 }
