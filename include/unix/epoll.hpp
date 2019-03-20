@@ -112,12 +112,12 @@ public:
             auto m = _unix::errno_str(errno);
             throw std::runtime_error("epoll_create1(): " + m);
         }
-        std::cerr << "DEBUG: epoll created: " << std::to_string(_efd) << std::endl;
+        std::cerr << "DEBUG: epoll created: " << std::to_string(_efd) << "\n";
     }
 
     ~Epoll(){
         if(_efd > 0){
-            std::cerr << "DEBUG: epoll closing (" << std::to_string(_efd) << ")";
+            std::cerr << "DEBUG: epoll closing (" << std::to_string(_efd) << ")\n";
             ::close(_efd);
             _efd = -1;
         }
