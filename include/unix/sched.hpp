@@ -8,9 +8,12 @@
 #include <initializer_list>
 #include <thread>
 
+#include <unix/common.hpp>
+#include <cpp.hpp>
+
 namespace _unix {
 
-namespace affinity {
+namespace sched {
 
 class CPUSet
 {
@@ -79,5 +82,5 @@ inline int affinity_set(const CPUSet & cs) { return affinity_set(0, cs); }
 } // ns affinity
 } // ns unix
 
-std::ostream& operator<<(std::ostream& os, const _unix::affinity::CPUSet & cs);
+std::ostream& operator<<(std::ostream& os, const _unix::sched::CPUSet & cs);
 

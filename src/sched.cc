@@ -1,4 +1,4 @@
-#include <unix/cpuset.hpp>
+#include <unix/sched.hpp>
 
 #include <sstream>
 #include <iostream>
@@ -6,7 +6,7 @@
 
 namespace _unix {
 
-namespace affinity {
+namespace sched {
 
 void CPUSet::zero()         { CPU_ZERO(&m_set); }
 void CPUSet::set(int cpu)   { check("set()",   cpu); CPU_SET(cpu, &m_set); }
@@ -99,7 +99,7 @@ int affinity_get(pid_t pid, CPUSet & cs){
 } // ns affinity
 } // ns _unix
 
-std::ostream& operator<<(std::ostream& os, const _unix::affinity::CPUSet & cs){
+std::ostream& operator<<(std::ostream& os, const _unix::sched::CPUSet & cs){
     os << cs.repr();
     return os;
 }

@@ -8,7 +8,7 @@
 #include <unix/inet.hpp>
 #include <unix/signals.hpp>
 #include <unix/epoll.hpp>
-#include <unix/cpuset.hpp>
+#include <unix/sched.hpp>
 
 // Kinda like in python you say "import Foo as bar'
 namespace unix = _unix;
@@ -182,8 +182,8 @@ int main(int argc, const char *argv[])
 		exit(1);
 	}
 
-    unix::affinity::CPUSet a;
-    unix::affinity::CPUSet b;
+    unix::sched::CPUSet a;
+    unix::sched::CPUSet b;
 
     a.set(0);
     b.set(0);
@@ -208,7 +208,7 @@ int main(int argc, const char *argv[])
 
     auto e = a & b;
 
-    auto x = unix::affinity::CPUSet({1,2,3,4,5});
+    auto x = unix::sched::CPUSet({1,2,3,4,5});
 
 
     std::cout << a << "\n";
@@ -225,36 +225,36 @@ int main(int argc, const char *argv[])
         uint16_t i = 0;
         while(run){
             std::cout << "thread: " << i++ << "\n"; std::this_thread::sleep_for(1s);
-            unix::affinity::CPUSet localset;
-            unix::affinity::affinity_get(localset);
+            unix::sched::CPUSet localset;
+            unix::sched::affinity_get(localset);
             std::cout << "thread (inside) cpuset: " << localset << "\n";
         }
     });
 
     std::string progname(argv[0]);
 
-    unix::affinity::CPUSet localset, mainset;
+    unix::sched::CPUSet localset, mainset;
 
     //Schedaffinity_set(unix::CPUSet({0}));
-    unix::affinity::affinity_set({0});
+    unix::sched::affinity_set({0});
 
-    unix::affinity::affinity_get_thread(thr, localset);
+    unix::sched::affinity_get_thread(thr, localset);
 
-    unix::affinity::affinity_get(mainset);
+    unix::sched::affinity_get(mainset);
 
     std::cout << "mainset: " << mainset << "\n";
 
     std::vector<int> v = {0,1,2};
 
-    unix::affinity::affinity_set(v);
+    unix::sched::affinity_set(v);
 
     std::cout << "thread cpuset (main, before): " << localset << "\n";
 
     std::this_thread::sleep_for(10s);
 
-    unix::affinity::affinity_set_thread(thr, {1});
+    unix::sched::affinity_set_thread(thr, {1});
 
-    unix::affinity::affinity_get_thread(thr, localset);
+    unix::sched::affinity_get_thread(thr, localset);
 
     std::cout << "thread cpuset (main, after): " << localset << "\n";
 
