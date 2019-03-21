@@ -72,7 +72,7 @@ int affinity_set_thread(std::thread & t, const CPUSet &);
 int affinity_get(pid_t, CPUSet &);
 int affinity_set(pid_t, const CPUSet &);
 
-inline int affinity_get(CPUSet & cs) { return affinity_set(0, cs); }
+inline int affinity_get(CPUSet & cs) { return affinity_get(0, cs); }
 inline int affinity_set(const CPUSet & cs) { return affinity_set(0, cs); }
 
 // Now can simply say "SchedSetAffinity({1,2})", for example.
