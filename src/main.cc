@@ -7,8 +7,8 @@
 
 #include <unix/inet.hpp>
 #include <unix/signals.hpp>
-
 #include <unix/epoll.hpp>
+#include <unix/cpuset.hpp>
 
 // Kinda like in python you say "import Foo as bar'
 namespace unix = _unix;
@@ -181,6 +181,43 @@ int main(int argc, const char *argv[])
 		std::cerr << "handleInterrupt() failed, exiting..\n";
 		exit(1);
 	}
+
+    unix::sched::CPUSet a;
+    unix::sched::CPUSet b;
+
+    a.set(0);
+    b.set(0);
+
+    if(a == b){
+        std::cout << "Equal cpusets! (ok)\n";
+    }
+
+    a.set(66);
+    a.set(1024);
+    a.set(1025);
+
+    b.set(1);
+
+    if(a != b){
+        std::cout << "non-Equal cpusets! (ok)\n";
+    }
+
+    auto c = a | b;
+
+    auto d = a ^ b;
+
+    auto e = a & b;
+
+    auto x = unix::sched::CPUSet({1,2,3,4,5});
+
+
+    std::cout << a << "\n";
+    std::cout << b << "\n";
+    std::cout << c << "\n";
+    std::cout << d << "\n";
+    std::cout << e << "\n";
+    std::cout << x << "\n";
+
 
     std::string progname(argv[0]);
 

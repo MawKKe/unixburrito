@@ -35,6 +35,7 @@ endif()
 
 add_library(inet src/inet.cc)
 add_library(signals src/signals.cc)
+add_library(cpuset  src/cpuset.cc)
 #add_library(epoll   src/signals.cc)
 
 # For simple one-way demonstration. (NOTE: not proper test programs)
@@ -42,6 +43,7 @@ add_executable(demo src/main.cc)
 
 add_library(UnixBurrito::inet ALIAS inet)
 add_library(UnixBurrito::signals ALIAS signals)
+add_library(UnixBurrito::cpuset ALIAS cpuset)
 
 add_custom_target(link_srv ALL COMMAND ${CMAKE_COMMAND} -E create_symlink demo "server")
 add_custom_target(link_cli ALL COMMAND ${CMAKE_COMMAND} -E create_symlink demo "client")
@@ -60,10 +62,15 @@ PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
+target_include_directories(cpuset
+PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+
 # -----------------------------------------------------------------------
 # TARGET LINKING
 # -----------------------------------------------------------------------
-target_link_libraries(demo inet signals)
+target_link_libraries(demo inet signals cpuset)
 
 # -----------------------------------------------------------------------
 # ADDITIONAL PROPERTIES
@@ -77,6 +84,7 @@ target_link_libraries(demo inet signals)
 # Hint for future: Don't replace PREFIX, all *nix tools expect "lib"-prefix.
 set_target_properties(inet    PROPERTIES OUTPUT_NAME "unixburrito_inet")
 set_target_properties(signals PROPERTIES OUTPUT_NAME "unixburrito_signals")
+set_target_properties(cpuset  PROPERTIES OUTPUT_NAME "unixburrito_cpuset")
 
 
 # Testing, only if we are developing
