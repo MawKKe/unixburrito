@@ -225,22 +225,18 @@ int main(int argc, const char *argv[])
         uint16_t i = 0;
         while(run){
             std::cout << "thread: " << i++ << "\n"; std::this_thread::sleep_for(1s);
-            unix::sched::CPUSet localset;
-            unix::sched::affinity_get(localset);
+            auto localset = unix::sched::affinity_get();
             std::cout << "thread (inside) cpuset: " << localset << "\n";
         }
     });
 
     std::string progname(argv[0]);
 
-    unix::sched::CPUSet localset, mainset;
-
-    //Schedaffinity_set(unix::CPUSet({0}));
     unix::sched::affinity_set({0});
 
-    unix::sched::affinity_get_thread(thr, localset);
+    auto localset = unix::sched::affinity_get_thread(thr);
 
-    unix::sched::affinity_get(mainset);
+    auto mainset = unix::sched::affinity_get();
 
     std::cout << "mainset: " << mainset << "\n";
 
@@ -254,7 +250,7 @@ int main(int argc, const char *argv[])
 
     unix::sched::affinity_set_thread(thr, {1});
 
-    unix::sched::affinity_get_thread(thr, localset);
+    localset = unix::sched::affinity_get_thread(thr);
 
     std::cout << "thread cpuset (main, after): " << localset << "\n";
 

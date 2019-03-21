@@ -45,11 +45,11 @@ public:
 
     std::string repr() const;
 
-    friend int affinity_get_thread(std::thread & t, CPUSet &);
-    friend int affinity_set_thread(std::thread & t, const CPUSet &);
+    friend CPUSet affinity_get_thread(std::thread & t);
+    friend void   affinity_set_thread(std::thread & t, const CPUSet &);
 
-    friend int affinity_get(pid_t, CPUSet &);
-    friend int affinity_set(pid_t, const CPUSet &);
+    friend CPUSet affinity_get(pid_t);
+    friend void   affinity_set(pid_t, const CPUSet &);
 
 private:
 
@@ -64,16 +64,15 @@ private:
 // These are simple wrappers for pthread_XXXaffinity functions.
 // These could be overloaded with affinity_get, but c++ impliciltly
 // converts pid_t to thread objects..
-int affinity_get_thread(std::thread & t, CPUSet &);
-int affinity_set_thread(std::thread & t, const CPUSet &);
+CPUSet affinity_get_thread(std::thread & t);
+void   affinity_set_thread(std::thread & t, const CPUSet &);
 
 // Set the affinity of a process / thread.
 // These are simple wrappers for sched_XXXaffinity functions.
-int affinity_get(pid_t, CPUSet &);
-int affinity_set(pid_t, const CPUSet &);
+CPUSet affinity_get(pid_t = 0);
+void   affinity_set(pid_t, const CPUSet &);
 
-inline int affinity_get(CPUSet & cs) { return affinity_get(0, cs); }
-inline int affinity_set(const CPUSet & cs) { return affinity_set(0, cs); }
+inline void affinity_set(const CPUSet & cs) { return affinity_set(0, cs); }
 
 // Now can simply say "SchedSetAffinity({1,2})", for example.
 //inline int  SchedSetAffinity(const std::initializer_list<int> & l) { CPUSet cs(l); return SchedSetAffinity(0, cs); }

@@ -78,22 +78,36 @@ void CPUSet::check(std::string func, int cpu) const{
     }
 }
 
-int affinity_set_thread(std::thread & t, const CPUSet & cs){
-    return ::pthread_setaffinity_np(t.native_handle(), sizeof(cs.m_set), &cs.m_set);
+void affinity_set_thread(std::thread & t, const CPUSet & cs){
+    int ret = ::pthread_setaffinity_np(t.native_handle(), sizeof(cs.m_set), &cs.m_set);
+    if(ret != 0){
+        throw std::runtime_error("pthread_setaffinity_np(): " + _unix::errno_str(errno));
+    }
 }
 
-int affinity_get_thread(std::thread & t, CPUSet & cs){
-    cs.zero();
-    return ::pthread_getaffinity_np(t.native_handle(), sizeof(cs.m_set), &cs.m_set);
+CPUSet affinity_get_thread(std::thread & t){
+    CPUSet cs; cs.zero();
+    int ret = ::pthread_getaffinity_np(t.native_handle(), sizeof(cs.m_set), &cs.m_set);
+    if(ret != 0){
+        throw std::runtime_error("pthread_getaffinity_np(): " + _unix::errno_str(errno));
+    }
+    return cs;
 }
 
-int affinity_set(pid_t pid, const CPUSet & cs){
-    return ::sched_setaffinity(pid, sizeof(cs.m_set), &cs.m_set);
+void affinity_set(pid_t pid, const CPUSet & cs){
+    int ret = ::sched_setaffinity(pid, sizeof(cs.m_set), &cs.m_set);
+    if(ret != 0){
+        throw std::runtime_error("sched_setaffinity(): " + _unix::errno_str(errno));
+    }
 }
 
-int affinity_get(pid_t pid, CPUSet & cs){
-    cs.zero();
-    return ::sched_getaffinity(pid, sizeof(cs.m_set), &cs.m_set);
+CPUSet affinity_get(pid_t pid){
+    CPUSet cs; cs.zero();
+    int ret = ::sched_getaffinity(pid, sizeof(cs.m_set), &cs.m_set);
+    if(ret != 0){
+        throw std::runtime_error("sched_getaffinity(): " + _unix::errno_str(errno));
+    }
+    return cs;
 }
 
 } // ns affinity
