@@ -121,7 +121,7 @@ inline Policy policy_get(pid_t pid = 0){
     auto ret = ::sched_getscheduler(pid);
     if(ret < 0){
         auto err = errno;
-        throw std::runtime_error("sched_getscheduler error: " + _unix::errno_str(err));
+        throw std::runtime_error("policy_get() error: " + _unix::errno_str(err));
     }
     return static_cast<Policy>(ret);
 }
@@ -130,11 +130,15 @@ using namespace cpp;
 
 inline int policy_set_normal(pid_t pid, Policy policy){
     if(!cpp::element_in(policy, {Policy::Other, Policy::Batch, Policy::Idle})){
-        throw std::runtime_error("Invalid Policy: " + to_string(policy) + " is not a 'Normal' policy");
+        throw std::runtime_error("policy_set_normal() error: Invalid Policy: " + to_string(policy) + " is not a 'Normal' policy");
     }
 
     struct sched_param prm; prm.sched_priority = 0;
-    return ::sched_setscheduler(pid, cpp::to_underlying(policy), &prm);
+    int ret = ::sched_setscheduler(pid, cpp::to_underlying(policy), &prm);
+    if(ret != 0){
+        throw std::runtime_error("policy_set_normal() error: " + _unix::errno_str(errno));
+    }
+    return ret;
 }
 
 inline int policy_set_normal(Policy policy){
@@ -143,14 +147,18 @@ inline int policy_set_normal(Policy policy){
 
 inline int policy_set_realtime(pid_t pid, Policy policy, Priority priority){
     if(!cpp::element_in(policy, {Policy::FIFO, Policy::RoundRobin})){
-        throw std::runtime_error("Invalid Policy: " + to_string(policy) + " is not a 'Realtime' policy");
+        throw std::runtime_error("policy_set_realtime() error: Invalid Policy - " + to_string(policy) + " is not a 'Realtime' policy");
     }
     if(!priority_range_check(policy, priority)){
-        throw std::runtime_error("Invalid priority value '" + std::to_string(priority) + "' for policy " + to_string(policy));
+        throw std::runtime_error("policy_set_realtime() error: Invalid priority value '" + std::to_string(priority) + "' for policy " + to_string(policy));
     }
 
     struct sched_param prm; prm.sched_priority = static_cast<int>(priority);
-    return ::sched_setscheduler(pid, cpp::to_underlying(policy), &prm);
+    int ret = ::sched_setscheduler(pid, cpp::to_underlying(policy), &prm);
+    if(ret != 0){
+        throw std::runtime_error("policy_set_realtime() error: " + _unix::errno_str(errno));
+    }
+    return ret;
 
 }
 inline int policy_set_realtime(Policy policy, Priority priority){
