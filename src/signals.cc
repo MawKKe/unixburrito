@@ -69,9 +69,11 @@ bool SigAction::mask_is_set(Signal signum) const {
 void SigAction::set_flags(const std::initializer_list<SigActionFlag> & fl){
     for(const auto & e : fl){
         if(e == SigActionFlag::IncludeSigInfo){
+#ifdef _UNIXBURRITO_DEBUG
             std::cerr
                 << "WARNING: SigAction::set_flags(): "
                 << "ignoring flag SigActionFlag::IncludeSigInfo (SA_SIGINFO)" << std::endl;
+#endif
             continue;
         }
         _act.sa_flags |= cpp::to_underlying(e);

@@ -159,7 +159,9 @@ int handleInterrupt(H h) {
     SigAction sa = SigAction::emptySet();
     sa.set_handler(h);
 
+#ifdef _UNIXBURRITO_DEBUG
     std::cerr << sa.to_string() << "\n";
+#endif
 
     auto sig = Signal::Interrupt;
 
@@ -169,7 +171,9 @@ int handleInterrupt(H h) {
         std::cerr << "ERROR sigaction(): " << _unix::errno_str(errno) << "\n";
         return -1;
     }
+#ifdef _UNIXBURRITO_DEBUG
     std::cerr << "INFO: signal handler set up for: " << _unix::signals::to_string(sig) << "\n";
+#endif
     return 0;
 }
 

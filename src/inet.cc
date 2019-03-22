@@ -268,7 +268,10 @@ std::vector<AddrInfo> getAddrInfo(
 
     struct addrinfo *res = nullptr, hints = ai.to_hints();
 
+#ifdef _BURRITO_DEBUG
     std::cerr << "DEBUG: getaddrinfo with hints:\n" << ai << "\n";
+#endif
+
     // Do lookup
     auto ret = getaddrinfo(h, s, &hints, &res);
 
@@ -296,18 +299,22 @@ std::vector<AIFlag> int_to_flags(int flags) {
         if(flags & mask){
             auto f = to_enum<AIFlag>(mask);
             if(!f){
+#ifdef _BURRITO_DEBUG
                 std::cerr << "WARNING: skipping unrecognized AIFlag value: " << mask << std::endl;
+#endif
                 continue;
             }
             fv.push_back(*f);
             flags &= ~mask;
         }
     }
+#ifdef _BURRITO_DEBUG
     if(flags){
         std::cerr
             << "WARNING -AddrIinfoHint::flags(): Uknown ai_flags remaining:"
             << flags << "\n";
     }
+#endif
 
     std::sort(fv.begin(), fv.end());
     return fv;
@@ -392,25 +399,33 @@ Maybe<Socket> server_socket_udp(
     const auto aiv = getAddrInfo(laddr, hints, service);
 
     for(const auto & ai : aiv){
+#ifdef _BURRITO_DEBUG
         std::cerr << "DEBUG: server_socket got ai:\n";
         std::cout << ai << std::endl;
+#endif
         try {
             Socket s(ai);
             int ret = s.bind(ai);
             if(ret != 0){
+#ifdef _BURRITO_DEBUG
                 std::cerr << "ERROR bind(): " << _unix::errno_str(errno) << std::endl;
+#endif
                 continue;
             }
             return std::move(s);
         }
         catch (std::runtime_error & e){
+#ifdef _BURRITO_DEBUG
             std::cerr << "server_socket_udp creation failed: " <<  e.what() << std::endl;
+#endif
             continue;
         }
     }
+#ifdef _BURRITO_DEBUG
     std::cerr
         << "ERROR: could not create socket for '"
         << laddr << ":" << service << "'" << std::endl;
+#endif
     return Nothing();
 }
 
@@ -423,7 +438,9 @@ Maybe<SockAddr> Socket::getsockname() const {
 	socklen_t len = sizeof(ss);
 	auto ret = ::getsockname(_sock, reinterpret_cast<struct sockaddr*>(&ss), &len);
 	if(ret < 0){
+#ifdef _BURRITO_DEBUG
 		std::cerr << "ERROR getsockname(): " << _unix::errno_str(errno) << std::endl;
+#endif
 		return Nothing();
 	}
 	return SockAddr::from_struct(ss, len, false);
@@ -451,20 +468,26 @@ Maybe<Socket> client_socket_udp(
     const auto aiv = getAddrInfo(raddr, hints, service);
 
     for(const auto & ai : aiv){
+#ifdef _BURRITO_DEBUG
         std::cerr << "----\n";
         std::cerr << "DEBUG: client_socket got ai:\n";
         std::cout << ai << std::endl;
+#endif
         try {
             Socket s(ai);
             int ret = s.connect(ai);
             if(ret != 0){
+#ifdef _BURRITO_DEBUG
                 std::cerr << "ERROR connect(): " << _unix::errno_str(errno) << std::endl;
+#endif
                 continue;
             }
             return std::move(s);
         }
         catch (std::runtime_error & e){
+#ifdef _BURRITO_DEBUG
             std::cerr << "client_socket_any creation failed: " <<  e.what() << std::endl;
+#endif
             continue;
         }
     }

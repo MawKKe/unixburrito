@@ -26,6 +26,7 @@ if(UNIXBURRITO_DEVELOP)
     add_compile_options(-Wextra)
     add_compile_options(-pedantic)
     add_compile_options(-frecord-gcc-switches) # invoke "readelf -p .GCC.command.line <binary>" to see all compile time flags
+    add_compile_definitions(_UNIXBURRITO_DEBUG)
 endif()
 
 
